@@ -18,8 +18,8 @@ export function createServer(opts: ServerOptions): McpServer {
       title: 'Show domain',
       description:
         "Show the project's domain language (DDD bounded contexts, glossary terms, definitions, avoided synonyms and relationships) " +
-        'read from GLOSSARY.md / GLOSSARY-MAP.md (or legacy CONTEXT.md / CONTEXT-MAP.md). Renders an interactive glossary panel where supported ' +
-        'and always returns a text summary.',
+        'read from GLOSSARY.md / GLOSSARY-MAP.md (or legacy CONTEXT.md / CONTEXT-MAP.md), and its architecture decision records (docs/adr/*.md). ' +
+        'Renders an interactive panel (a home page listing the glossary and ADRs) where supported and always returns a text summary.',
       inputSchema: showDomainInput,
       annotations: { readOnlyHint: true, openWorldHint: false },
       _meta: { ui: { resourceUri: VIEW_URI } },
@@ -27,7 +27,7 @@ export function createServer(opts: ServerOptions): McpServer {
     async (args) => showDomain(args, opts),
   );
 
-  registerAppResource(server, 'Domain view', VIEW_URI, { description: 'Interactive glossary of the domain model' }, async () => ({
+  registerAppResource(server, 'Domain view', VIEW_URI, { description: 'Interactive view of the domain model: home, glossary and ADRs' }, async () => ({
     contents: [{ uri: VIEW_URI, mimeType: RESOURCE_MIME_TYPE, text: opts.viewHtml }],
   }));
 

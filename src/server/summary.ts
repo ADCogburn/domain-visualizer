@@ -1,14 +1,15 @@
-import { countTerms, type DomainModel } from '../model/types.js';
+import { adrNumber, countTerms, type DomainModel } from '../model/types.js';
 
 /**
  * Plain-text rendering of the model. This is all Claude Code (and any host without
  * MCP Apps) sees, so it has to stand on its own.
  */
 export function summarize(model: DomainModel, sourceLabel: string): string {
-  const out: string[] = [];
+  const out: string[] = [`Project: ${model.project}`];
   const n = countTerms(model);
   const ctx = model.contexts.length;
-  out.push(`Domain glossary from ${sourceLabel}: ${n} term${n === 1 ? '' : 's'} in ${ctx} context${ctx === 1 ? '' : 's'}.`);
+  if (ctx) out.push(`Domain glossary from ${sourceLabel}: ${n} term${n === 1 ? '' : 's'} in ${ctx} context${ctx === 1 ? '' : 's'}.`);
+  else out.push(`No glossary found in ${sourceLabel}.`);
 
   for (const c of model.contexts) {
     out.push('');
@@ -32,6 +33,15 @@ export function summarize(model: DomainModel, sourceLabel: string): string {
     for (const r of rels) {
       if (r.kind === 'context') out.push(`- ${r.from} ${r.bidirectional ? '↔' : '→'} ${r.to}: ${r.description}`);
       else out.push(`- [${r.context}] ${r.description}`);
+    }
+  }
+
+  if (model.adrs.length) {
+    out.push('', `## ADRs (${model.adrs.length})`);
+    for (const a of model.adrs) {
+      const num = a.number === null ? '' : `${adrNumber(a.number)} `;
+      const tags = [a.status, a.context].filter(Boolean).join(', ');
+      out.push(`- ${num}${a.title}${tags ? ` [${tags}]` : ''} (${a.path})`);
     }
   }
 

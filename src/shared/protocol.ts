@@ -10,9 +10,16 @@ import type { DomainModel } from '../model/types.js';
 export const TOOL_NAME = 'show_domain';
 export const VIEW_URI = 'ui://domain-visualizer/domain-view.html';
 
-/** Views the panel can open. Add an id here when adding a view under src/ui/views/. */
-export const VIEWS = ['glossary'] as const;
+/** Views the panel can show. Add an id here when adding a view under src/ui/views/. */
+export const VIEWS = ['home', 'glossary', 'adr'] as const;
 export type ViewId = (typeof VIEWS)[number];
+
+/**
+ * Views `show_domain` can open directly (its `view` input). The ADR view needs to know
+ * which ADR, so for now it is reached only from Home.
+ */
+export const OPEN_VIEWS = ['home', 'glossary'] as const satisfies readonly ViewId[];
+export const DEFAULT_VIEW: ViewId = 'home';
 
 /**
  * Key under the tool result's `_meta` that carries the payload to the view.

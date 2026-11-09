@@ -29,6 +29,7 @@ export async function diskSource(path: string): Promise<FileSource> {
 
   return {
     label: root,
+    folderName: pathBasename(root) || undefined,
     entry,
     async read(rel) {
       const full = toAbs(rel);
