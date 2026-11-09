@@ -1,0 +1,12 @@
+{
+  "name": "domain-visualizer",
+  "owner": { "name": "Andrew" },
+  "description": "Marketplace for the domain-visualizer plugin.",
+  "plugins": [
+    {
+      "name": "domain-visualizer",
+      "source": "./plugins/domain-visualizer",
+      "description": "Shows a project's domain language (DDD bounded contexts and glossary) as an interactive panel."
+    }
+  ]
+}

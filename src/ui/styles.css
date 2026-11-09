@@ -1,0 +1,146 @@
+/*
+ * Fallbacks for Claude's MCP Apps style tokens, used in the dev page and in hosts that
+ * send none. Real host values are set inline on <html> by applyHostStyleVariables and win.
+ */
+:root {
+  color-scheme: light dark;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f4ed;
+  --color-background-info: #d6e4f6;
+  --color-text-primary: #141413;
+  --color-text-secondary: #3d3d3a;
+  --color-text-tertiary: #73726c;
+  --color-text-info: #3266ad;
+  --color-border-primary: rgb(31 30 29 / 0.4);
+  --color-border-secondary: rgb(31 30 29 / 0.3);
+  --color-border-tertiary: rgb(31 30 29 / 0.15);
+  --color-ring-info: rgb(50 102 173 / 0.5);
+  --font-sans: 'Anthropic Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-text-xs-size: 12px;
+  --font-text-sm-size: 14px;
+  --font-text-md-size: 16px;
+  --font-text-sm-line-height: 1.4;
+  --font-text-md-line-height: 1.4;
+  --font-heading-sm-size: 14px;
+  --font-heading-sm-line-height: 1.4;
+  --font-heading-md-size: 16px;
+  --border-radius-sm: 6px;
+  --border-radius-md: 8px;
+  --border-width-regular: 0.5px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-background-primary: #30302e;
+    --color-background-secondary: #262624;
+    --color-background-info: #253e5f;
+    --color-text-primary: #faf9f5;
+    --color-text-secondary: #c2c0b6;
+    --color-text-tertiary: #9c9a92;
+    --color-text-info: #80aadd;
+    --color-border-primary: rgb(222 220 209 / 0.4);
+    --color-border-secondary: rgb(222 220 209 / 0.3);
+    --color-border-tertiary: rgb(222 220 209 / 0.15);
+    --color-ring-info: rgb(128 170 221 / 0.5);
+  }
+}
+:root[data-theme='dark'] {
+  --color-background-primary: #30302e;
+  --color-background-secondary: #262624;
+  --color-background-info: #253e5f;
+  --color-text-primary: #faf9f5;
+  --color-text-secondary: #c2c0b6;
+  --color-text-tertiary: #9c9a92;
+  --color-text-info: #80aadd;
+  --color-border-primary: rgb(222 220 209 / 0.4);
+  --color-border-secondary: rgb(222 220 209 / 0.3);
+  --color-border-tertiary: rgb(222 220 209 / 0.15);
+  --color-ring-info: rgb(128 170 221 / 0.5);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Transparent so the panel blends with Claude's own surface. */
+html,
+body {
+  margin: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-text-md-size);
+  line-height: var(--font-text-md-line-height);
+}
+
+#app {
+  container-type: inline-size;
+  padding: 4px 2px 8px;
+}
+:root[data-display-mode='fullscreen'] #app {
+  padding: 16px;
+}
+
+.dv-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.dv-title {
+  margin: 0;
+  font-size: var(--font-heading-md-size);
+  font-weight: var(--font-weight-semibold);
+}
+.dv-meta {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-text-sm-size);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dv-button {
+  min-height: 32px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: var(--font-text-sm-size);
+  color: var(--color-text-primary);
+  background: transparent;
+  border: var(--border-width-regular) solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+}
+.dv-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-ring-info);
+}
+
+.dv-warnings {
+  margin-top: 12px;
+  font-size: var(--font-text-sm-size);
+  color: var(--color-text-tertiary);
+}
+.dv-warnings ul {
+  margin: 4px 0 0;
+  padding-left: 1.2em;
+}
+
+.dv-loading {
+  display: grid;
+  gap: 8px;
+}
+.dv-skeleton {
+  height: 14px;
+  border-radius: var(--border-radius-sm);
+  background: var(--color-background-secondary);
+}
+.dv-error {
+  color: var(--color-text-secondary);
+}

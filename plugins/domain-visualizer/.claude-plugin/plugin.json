@@ -1,0 +1,9 @@
+{
+  "name": "domain-visualizer",
+  "displayName": "Domain Visualizer",
+  "version": "0.1.0",
+  "description": "Shows a project's domain language (DDD bounded contexts, glossary terms, definitions and avoided synonyms) as an interactive panel, read from GLOSSARY.md / GLOSSARY-MAP.md files.",
+  "author": { "name": "Andrew" },
+  "license": "MIT",
+  "keywords": ["ddd", "domain-driven-design", "glossary", "ubiquitous-language", "bounded-context", "mcp-app"]
+}

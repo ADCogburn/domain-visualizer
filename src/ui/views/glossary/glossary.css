@@ -1,0 +1,197 @@
+/* Glossary view. Only host tokens (see src/ui/styles.css for fallbacks). */
+
+.gl-view {
+  display: grid;
+  gap: 12px;
+}
+
+/* Full screen: list plus a sticky definition sidebar (no floating panels). */
+.gl-full {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  align-items: start;
+}
+.gl-full .gl-strip {
+  order: 2;
+  position: sticky;
+  top: 12px;
+}
+@container (max-width: 640px) {
+  .gl-full {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gl-full .gl-strip {
+    order: 0;
+    top: 0;
+    z-index: 1;
+  }
+}
+
+/* The strip: part of the layout, so inline cards never clip it. */
+.gl-strip {
+  min-height: 3.6em;
+  padding: 8px 12px;
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-secondary);
+  border: var(--border-width-regular) solid var(--color-border-tertiary);
+  font-size: var(--font-text-sm-size);
+  line-height: var(--font-text-sm-line-height);
+}
+.gl-strip p {
+  margin: 0;
+}
+.gl-strip-hint {
+  color: var(--color-text-tertiary);
+}
+.gl-strip-title {
+  margin-bottom: 2px !important;
+}
+.gl-strip-ctx,
+.gl-strip-meta {
+  color: var(--color-text-tertiary);
+}
+.gl-strip-avoided {
+  color: var(--color-text-tertiary);
+  text-decoration: line-through;
+}
+.gl-strip-def {
+  color: var(--color-text-secondary);
+}
+.gl-strip-goto {
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-info);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.gl-list {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.gl-context-head h2,
+.gl-rels h2 {
+  margin: 0;
+  font-size: var(--font-heading-sm-size);
+  line-height: var(--font-heading-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+.gl-source {
+  font-family: var(--font-mono);
+  font-size: var(--font-text-xs-size);
+  color: var(--color-text-tertiary);
+}
+.gl-desc {
+  margin: 2px 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-text-sm-size);
+}
+
+.gl-terms {
+  margin: 8px 0 0;
+  display: grid;
+  gap: 6px;
+}
+.gl-cluster {
+  margin-top: 6px;
+  font-size: var(--font-text-xs-size);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-tertiary);
+}
+.gl-entry {
+  display: grid;
+  grid-template-columns: minmax(7em, max-content) minmax(0, 1fr);
+  column-gap: 12px;
+  padding: 4px 6px;
+  margin: 0 -6px;
+  border-radius: var(--border-radius-sm);
+}
+.gl-entry dt {
+  font-weight: var(--font-weight-semibold);
+}
+.gl-entry dd {
+  margin: 0;
+  grid-column: 2;
+}
+.gl-avoid-list {
+  font-size: var(--font-text-sm-size);
+  color: var(--color-text-tertiary);
+}
+@container (max-width: 420px) {
+  .gl-entry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gl-entry dd {
+    grid-column: 1;
+  }
+}
+
+.gl-flash {
+  animation: gl-flash 1.2s ease-out;
+}
+@keyframes gl-flash {
+  from {
+    background: var(--color-background-info);
+  }
+  to {
+    background: transparent;
+  }
+}
+
+/* Glossary phrases */
+.gl-term,
+.gl-avoid {
+  border-radius: 2px;
+  cursor: help;
+  outline: none;
+}
+.gl-term {
+  text-decoration: underline dotted;
+  text-decoration-color: var(--color-text-tertiary);
+  text-underline-offset: 3px;
+}
+.gl-avoid {
+  color: var(--color-text-tertiary);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--color-border-primary);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.gl-term:focus-visible,
+.gl-avoid:focus-visible,
+.gl-strip-goto:focus-visible,
+.gl-more:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-ring-info);
+}
+.gl-active {
+  background: var(--color-background-info);
+}
+
+.gl-more {
+  justify-self: start;
+  min-height: 32px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: var(--font-text-sm-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+  border: var(--border-width-regular) solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+}
+
+.gl-rels ul {
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+  font-size: var(--font-text-sm-size);
+  color: var(--color-text-secondary);
+}
+.gl-empty {
+  color: var(--color-text-tertiary);
+}
