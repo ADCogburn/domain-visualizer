@@ -2,18 +2,17 @@ import { buildIndex } from '../../../model/term-index.js';
 import { countTerms, type BoundedContext, type DomainModel, type Term } from '../../../model/types.js';
 import type { DomainView, ViewContext } from '../types.js';
 import { markup, termSpan } from './highlight.js';
+import { createTooltip } from './tooltip.js';
 import './glossary.css';
 
 /** How many terms an inline card shows before offering "Show all". */
 export const INLINE_LIMIT = 8;
 
-const HINT = 'Hover or focus an underlined term to see its definition.';
-
 /**
  * Glossary view: every context's terms with definitions. Glossary phrases get a dotted
- * underline; avoided synonyms are greyed and point at the canonical term. Definitions show
- * in a strip that is part of the layout (top of the card inline, a sticky sidebar in full
- * screen), never in a floating popover, because hosts clip popovers.
+ * underline; avoided synonyms are greyed and point at the canonical term. Hovering or
+ * focusing one shows its definition in a small tooltip next to it, kept inside the
+ * iframe's viewport (see tooltip.ts) because the host clips anything outside it.
  */
 export const glossaryView: DomainView = {
   id: 'glossary',
@@ -43,8 +42,6 @@ function renderGlossary(root: HTMLElement, model: DomainModel, ctx: ViewContext,
   const multi = model.contexts.length > 1;
 
   const wrap = el(doc, 'div', { class: `gl-view ${full ? 'gl-full' : 'gl-inline'}` });
-  const strip = el(doc, 'aside', { class: 'gl-strip', 'aria-live': 'polite', 'aria-label': 'Definition' });
-  strip.append(el(doc, 'p', { class: 'gl-strip-hint' }, HINT));
   const list = el(doc, 'div', { class: 'gl-list' });
 
   const limit = full || expanded ? Infinity : INLINE_LIMIT;
@@ -88,31 +85,46 @@ function renderGlossary(root: HTMLElement, model: DomainModel, ctx: ViewContext,
     markup(node, index, { context: node.closest<HTMLElement>('[data-context]')?.dataset.context });
   }
 
-  wrap.append(strip, list);
+  wrap.append(list);
   root.append(wrap);
 
+  const tip = createTooltip(doc);
   const show = (span: HTMLElement) => {
     const term = terms.get(key(span.dataset.context ?? '', span.dataset.term ?? ''));
     if (!term) return;
-    strip.replaceChildren(...stripContent(doc, span, term, multi));
     root.querySelectorAll('.gl-active').forEach((n) => n.classList.remove('gl-active'));
     span.classList.add('gl-active');
+    tip.show(span, tipContent(doc, span, term, multi));
+  };
+  const hide = () => {
+    tip.anchor?.classList.remove('gl-active');
+    tip.hide();
   };
   const target = (e: Event) => (e.target as Element | null)?.closest?.<HTMLElement>('.gl-term, .gl-avoid') ?? null;
   wrap.addEventListener('mouseover', (e) => {
     const t = target(e);
     if (t && list.contains(t)) show(t);
   });
+  wrap.addEventListener('mouseout', (e) => {
+    const a = tip.anchor;
+    if (a && target(e) === a && !a.contains(e.relatedTarget as Node | null) && doc.activeElement !== a) hide();
+  });
   wrap.addEventListener('focusin', (e) => {
     const t = target(e);
     if (t && list.contains(t)) show(t);
   });
+  wrap.addEventListener('focusout', (e) => {
+    if (tip.anchor && e.target === tip.anchor) hide();
+  });
   wrap.addEventListener('click', (e) => {
-    const go = (e.target as Element).closest?.<HTMLElement>('[data-goto-term]');
-    const t = go ?? target(e);
-    if (t && (go || t.dataset.kind === 'avoid')) jumpTo(root, t.dataset.context ?? '', t.dataset.term ?? t.dataset.gotoTerm ?? '');
+    const t = target(e);
+    if (t && t.dataset.kind === 'avoid') jumpTo(root, t.dataset.context ?? '', t.dataset.term ?? '');
   });
   wrap.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && tip.anchor) {
+      hide();
+      return;
+    }
     const t = target(e);
     if (t && (e.key === 'Enter' || e.key === ' ') && t.dataset.kind === 'avoid') {
       e.preventDefault();
@@ -154,21 +166,18 @@ function renderContext(doc: Document, c: BoundedContext, multi: boolean, limit: 
   return section;
 }
 
-function stripContent(doc: Document, span: HTMLElement, term: Term, multi: boolean): Node[] {
+function tipContent(doc: Document, span: HTMLElement, term: Term, multi: boolean): Node[] {
   const out: Node[] = [];
-  const title = el(doc, 'p', { class: 'gl-strip-title' });
+  const title = el(doc, 'p', { class: 'gl-tip-title' });
   if (span.dataset.kind === 'avoid') {
-    title.append(
-      el(doc, 'span', { class: 'gl-strip-avoided' }, `“${span.textContent}”`),
-      ' is avoided. Use ',
-      el(doc, 'button', { type: 'button', class: 'gl-strip-goto', 'data-goto-term': term.name, 'data-context': term.context }, term.name),
-    );
+    title.append(el(doc, 'span', { class: 'gl-tip-avoided' }, `“${span.textContent}”`), ' is avoided. Use ', el(doc, 'strong', {}, term.name));
   } else {
     title.append(el(doc, 'strong', {}, term.name));
   }
-  if (multi) title.append(el(doc, 'span', { class: 'gl-strip-ctx' }, ` · ${term.context}`));
-  out.push(title, el(doc, 'p', { class: 'gl-strip-def' }, term.definition || '(no definition)'));
-  if (term.avoid.length) out.push(el(doc, 'p', { class: 'gl-strip-meta' }, `Avoid: ${term.avoid.join(', ')}`));
+  if (multi) title.append(el(doc, 'span', { class: 'gl-tip-ctx' }, ` · ${term.context}`));
+  out.push(title, el(doc, 'p', { class: 'gl-tip-def' }, term.definition || '(no definition)'));
+  if (span.dataset.kind === 'avoid') out.push(el(doc, 'p', { class: 'gl-tip-meta' }, `Click to jump to ${term.name}.`));
+  else if (term.avoid.length) out.push(el(doc, 'p', { class: 'gl-tip-meta' }, `Avoid: ${term.avoid.join(', ')}`));
   return out;
 }
 
