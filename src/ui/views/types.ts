@@ -3,12 +3,26 @@ import type { ViewId } from '../../shared/protocol.js';
 
 export type DisplayMode = 'inline' | 'fullscreen' | 'pip';
 
+/** Which page the panel shows. The ADR page also needs which ADR (its path). */
+export type Route = { view: 'home' } | { view: 'glossary' } | { view: 'adr'; adr: string };
+
+export interface NavigateOptions {
+  /** Ask the host for full screen first, when it has one. */
+  fullscreen?: boolean;
+}
+
 /** What the shell tells a view about where it is drawn. Views never talk to the host directly. */
 export interface ViewContext {
   displayMode: DisplayMode;
   /** True when the host can switch this panel to full screen. */
   canFullscreen: boolean;
   requestDisplayMode(mode: DisplayMode): Promise<void>;
+  /** The page being drawn. */
+  route: Route;
+  /** Move to another page inside the panel (no new tool call). */
+  navigate(route: Route, opts?: NavigateOptions): void;
+  /** Open an external URL through the host. */
+  openLink(url: string): void;
 }
 
 /**

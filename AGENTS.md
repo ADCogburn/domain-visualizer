@@ -15,11 +15,11 @@ plugins/domain-visualizer/        exactly what Claude installs (copied as-is, no
 src/
   model/        DomainModel types + term index. Imports nothing else in src/.
   sources/      FileSource: disk (local server) or inline tool-argument files (remote-safe)
-  parsers/      input formats -> DomainModel. glossary-md/ = GLOSSARY(-MAP).md, CONTEXT(-MAP).md
+  parsers/      input formats -> DomainModel. glossary-md/ = GLOSSARY(-MAP).md, CONTEXT(-MAP).md; adr-md/ = docs/adr/*.md; project.ts = project name
   shared/       protocol.ts: tool name, view URI, view ids, payload type (server <-> view contract)
   server/       MCP server, show_domain tool, text summary, stdio entry (main.ts)
   ui/           MCP App: main.ts (host wiring), shell.ts (header, display modes), dev.ts (browser harness)
-    views/      one folder per view (glossary/ now; mermaid/, graph/ later)
+    views/      one folder per view: home/ (default), glossary/, adr/; shared/ = term highlighting, tooltip, status badge
   test-support/ shared test data
 fixtures/       sample projects: single-context, multi-context, legacy-context
 scripts/        build-server.mjs, inspect.mjs, built-server.test.ts (stdio end-to-end)
@@ -31,7 +31,7 @@ Parsing, the domain model, and views are separate layers, so a new input format 
 
 - `model/` depends on nothing. It must stay JSON-serializable: it travels to the view in the tool result's `_meta["domain-visualizer/payload"]`.
 - `parsers/` depends on `model/` and the `FileSource` interface only. New format: add `src/parsers/<format>/`, implement `DomainParser`, register it in `src/parsers/index.ts`.
-- `ui/views/` depend on `model/` and the DOM only; never on parsers, sources or server. New view: add `src/ui/views/<id>/`, register it in `src/ui/views/index.ts`, add the id to `VIEWS` in `src/shared/protocol.ts`.
+- `ui/views/` depend on `model/` and the DOM only; never on parsers, sources or server. New view: add `src/ui/views/<id>/`, register it in `src/ui/views/index.ts`, add the id to `VIEWS` in `src/shared/protocol.ts` (and to `OPEN_VIEWS` only if `show_domain` may open it directly). Pages change inside the panel through `ctx.navigate`; no new tool call.
 - `server/` composes sources + parsers + summary. `shared/` has no Node or DOM imports.
 - Only `sources/disk.ts` and `server/` may import `node:*`.
 
@@ -57,7 +57,7 @@ Always run `npm run build` and commit `server/server.js` with any change under `
 - No install step: plugins are copied as-is, so the server is one bundled file launched via `${CLAUDE_PLUGIN_ROOT}`. Node must be on the user's PATH.
 - MCP Apps SDK: `@modelcontextprotocol/ext-apps` 2.x with the split MCP SDK v2 (`@modelcontextprotocol/server`), not `@modelcontextprotocol/sdk` 1.x. Server: `registerAppTool` / `registerAppResource`. View: `App`, `applyDocumentTheme`, `applyHostStyleVariables`, `applyHostFonts`. The view is one HTML file (Vite + `vite-plugin-singlefile`).
 - Display: inline cards auto-fit height, can't scroll internally, and clip menus and popovers; keep inline content short. Full screen (`app.requestDisplayMode`) is for the whole view, but Claude's guidelines say no floating panels there either: use sidebars, tabs or in-flow strips for anything large or interactive.
-- Hover details: show them in a tooltip next to the thing hovered, not in a strip or sidebar elsewhere in the layout (owner's preference: a box that changes somewhere else is easy to miss). Reuse `src/ui/views/glossary/tooltip.ts`: `position: fixed` on `<body>`, clamped to the iframe's viewport (flips above when there's no room below) so the host can't clip it and it never changes the inline card's auto-fit height. Keep tooltips small and non-interactive (`pointer-events: none`); show on hover and focus, hide on mouse-out, blur and Escape. Anything clickable goes on the element itself, not in the tooltip.
+- Hover details: show them in a tooltip next to the thing hovered, not in a strip or sidebar elsewhere in the layout (owner's preference: a box that changes somewhere else is easy to miss). Reuse `src/ui/views/shared/term-hover.ts` (built on `shared/tooltip.ts`): `position: fixed` on `<body>`, clamped to the iframe's viewport (flips above when there's no room below) so the host can't clip it and it never changes the inline card's auto-fit height. Keep tooltips small and non-interactive (`pointer-events: none`); show on hover and focus, hide on mouse-out, blur and Escape. Anything clickable goes on the element itself, not in the tooltip.
 - Theme: use the host's CSS variables (`--color-*`, `--font-*`, `--border-*`), keep the page background transparent, support light and dark. `src/ui/styles.css` holds fallbacks only.
 - Claude Desktop caches MCP App UI aggressively: fully quit and restart it after UI changes.
 - MCP Apps skills for coding agents: `/plugin marketplace add modelcontextprotocol/ext-apps` then `/plugin install mcp-apps@mcp-apps`.

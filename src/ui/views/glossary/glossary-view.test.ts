@@ -7,9 +7,10 @@ import { inlineSource } from '../../../sources/inline.js';
 import { billing, identity } from '../../../test-support/glossary-samples.js';
 import type { ViewContext } from '../types.js';
 import { glossaryView, INLINE_LIMIT } from './glossary-view.js';
-import { markup } from './highlight.js';
+import { markup } from '../shared/highlight.js';
 
 vi.mock('./glossary.css', () => ({}));
+vi.mock('../shared/terms.css', () => ({}));
 
 let model: DomainModel;
 beforeEach(async () => {
@@ -27,6 +28,9 @@ const ctx = (over: Partial<ViewContext> = {}): ViewContext => ({
   displayMode: 'inline',
   canFullscreen: true,
   requestDisplayMode: vi.fn(async () => {}),
+  route: { view: 'glossary' },
+  navigate: vi.fn(),
+  openLink: vi.fn(),
   ...over,
 });
 

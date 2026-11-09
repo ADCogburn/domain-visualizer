@@ -11,23 +11,46 @@ describe('showDomain', () => {
   it('reads a project path relative to the project root', async () => {
     const r = await showDomain({ path: 'fixtures/multi-context' }, deps);
     expect(r.isError).toBeUndefined();
-    expect(payload(r).view).toBe('glossary');
+    expect(payload(r).view).toBe('home');
     expect(payload(r).model.contexts).toHaveLength(3);
     const text = r.content[0]!.text;
-    expect(text).toMatch(/^Domain glossary from .*multi-context: 7 terms in 3 contexts\./);
+    expect(text).toMatch(/^Project: multi-context\nDomain glossary from .*multi-context: 7 terms in 3 contexts\./);
     expect(text).toContain('- **Invoice**: A request for payment sent to a customer after delivery. (avoid: Bill, payment request)');
     expect(text).toContain('- Ordering → Billing: Ordering emits OrderPlaced events; Billing consumes them to raise invoices');
   });
 
   it('reads raw files', async () => {
     const r = await showDomain({ files: [{ path: 'GLOSSARY.md', content: '# Shop\n\n## Language\n\n**Cart**:\nItems a shopper intends to buy.\n' }] }, deps);
-    expect(r.content[0]!.text).toBe('Domain glossary from inline files: 1 term in 1 context.\n\n## Shop (GLOSSARY.md)\n- **Cart**: Items a shopper intends to buy.');
+    expect(r.content[0]!.text).toBe('Project: Domain\nDomain glossary from inline files: 1 term in 1 context.\n\n## Shop (GLOSSARY.md)\n- **Cart**: Items a shopper intends to buy.');
   });
 
   it('lists clusters and warnings in the text summary', async () => {
     const r = await showDomain({ files: [{ path: 'GLOSSARY.md', content: '# S\n\n## Language\n\n### Group\n\n**A**:\n' }] }, deps);
     expect(r.content[0]!.text).toContain('### Group\n- **A**: (no definition)');
     expect(r.content[0]!.text).toContain('## Warnings\n- GLOSSARY.md: line 7: "A" has no definition');
+  });
+
+  it('lists ADRs in the text summary and payload', async () => {
+    const r = await showDomain({ path: 'fixtures/single-context', view: 'glossary' }, deps);
+    expect(payload(r).view).toBe('glossary');
+    expect(payload(r).model.adrs.map((a) => a.number)).toEqual([1, 2]);
+    expect(r.content[0]!.text).toContain(
+      '## ADRs (2)\n- 0001 Invoices are immutable once sent [accepted] (docs/adr/0001-invoices-are-immutable.md)\n' +
+        '- 0002 Payments settle the oldest Invoice first [proposed] (docs/adr/0002-payments-settle-oldest-invoice-first.md)',
+    );
+  });
+
+  it('shows a project that has ADRs but no glossary', async () => {
+    const r = await showDomain({ files: [{ path: 'docs/adr/0003-use-postgres.md', content: '# Use Postgres\n\nWe need SQL.\n' }], project: '  Shop  ' }, deps);
+    expect(r.isError).toBeUndefined();
+    const m = payload(r).model;
+    expect(m.project).toBe('Shop');
+    expect(m.contexts).toEqual([]);
+    expect(m.warnings).toEqual([]);
+    expect(m.adrs).toEqual([
+      { path: 'docs/adr/0003-use-postgres.md', number: 3, title: 'Use Postgres', status: null, context: null, summary: 'We need SQL.', body: 'We need SQL.' },
+    ]);
+    expect(r.content[0]!.text).toBe('Project: Shop\nNo glossary found in inline files.\n\n## ADRs (1)\n- 0003 Use Postgres (docs/adr/0003-use-postgres.md)');
   });
 
   it('requires exactly one of path or files', async () => {

@@ -1,0 +1,121 @@
+/* Home view. Host tokens only (see src/ui/styles.css for fallbacks). */
+
+.hm-artifacts {
+  display: grid;
+  gap: 8px;
+}
+.hm-heading {
+  margin: 0;
+  font-size: var(--font-text-xs-size);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+}
+.hm-subheading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  font-size: var(--font-heading-sm-size);
+  line-height: var(--font-heading-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+.hm-count {
+  min-width: 1.6em;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--color-background-secondary);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-text-xs-size);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+.hm-group {
+  margin: 4px 0 0;
+  font-size: var(--font-text-xs-size);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+}
+
+.hm-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.hm-row {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  text-align: left;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: var(--border-width-regular) solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+button.hm-row:hover {
+  background: var(--color-background-secondary);
+  border-color: var(--color-border-secondary);
+}
+button.hm-row:focus-visible,
+.hm-more:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-ring-info);
+}
+.hm-row-empty {
+  cursor: default;
+  border-style: dashed;
+}
+.hm-row-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.hm-title-text {
+  font-weight: var(--font-weight-semibold);
+  min-width: 0;
+}
+.hm-num {
+  font-family: var(--font-mono);
+  font-size: var(--font-text-xs-size);
+  color: var(--color-text-tertiary);
+}
+.hm-row-meta,
+.hm-summary {
+  margin: 0;
+  font-size: var(--font-text-sm-size);
+  line-height: var(--font-text-sm-line-height);
+  color: var(--color-text-secondary);
+}
+.hm-row-meta {
+  color: var(--color-text-tertiary);
+}
+.hm-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.hm-more {
+  justify-self: start;
+  min-height: 32px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: var(--font-text-sm-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+  border: var(--border-width-regular) solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+}

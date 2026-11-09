@@ -39,6 +39,9 @@ const shell = createShell($('app'), {
     applyFrame();
     return mode;
   },
+  openLink(url) {
+    window.open(url, '_blank', 'noopener');
+  },
 });
 
 function applyFrame() {
@@ -51,8 +54,8 @@ function applyFrame() {
 
 async function load() {
   const files = fixtures.get(fixtureSel.value) ?? [];
-  const model = await loadDomain(inlineSource(files));
-  const payload: ShowDomainPayload = { view: 'glossary', source: `fixtures/${fixtureSel.value}`, model };
+  const model = await loadDomain(inlineSource(files), { project: fixtureSel.value });
+  const payload: ShowDomainPayload = { view: 'home', source: `fixtures/${fixtureSel.value}`, model };
   shell.showPayload(payload);
 }
 

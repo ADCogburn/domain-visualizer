@@ -60,7 +60,7 @@ describe.skipIf(!existsSync(bundle))('built server (stdio)', () => {
     const tool = tools.find((t: Json) => t.name === 'show_domain');
     expect(tool).toBeTruthy();
     expect(tool._meta.ui.resourceUri).toBe('ui://domain-visualizer/domain-view.html');
-    expect(Object.keys(tool.inputSchema.properties).sort()).toEqual(['files', 'path', 'view']);
+    expect(Object.keys(tool.inputSchema.properties).sort()).toEqual(['files', 'path', 'project', 'view']);
     expect(tool.annotations.readOnlyHint).toBe(true);
   });
 
@@ -75,7 +75,7 @@ describe.skipIf(!existsSync(bundle))('built server (stdio)', () => {
     it(`calls show_domain on fixtures/${fixture}`, async () => {
       const r = await request('tools/call', { name: 'show_domain', arguments: { path: `fixtures/${fixture}` } });
       expect(r.isError).toBeFalsy();
-      expect(r.content[0].text).toMatch(/^Domain glossary from .*: \d+ terms? in \d+ contexts?\./);
+      expect(r.content[0].text).toMatch(/^Project: .+\nDomain glossary from .*: \d+ terms? in \d+ contexts?\./);
       // The model goes to the view via _meta, so hosts show the model the text, not JSON.
       expect(r.structuredContent).toBeUndefined();
       const payload = r._meta['domain-visualizer/payload'];

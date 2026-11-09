@@ -7,6 +7,8 @@
 export interface FileSource {
   /** Shown in summaries, e.g. the project root or "inline files". */
   label: string;
+  /** The project folder's own name, when the source is a folder. */
+  folderName?: string;
   /** A specific file the caller pointed at, if any. Parsers load it instead of discovering. */
   entry?: string;
   /** File text, or undefined when the file doesn't exist or can't be read. */

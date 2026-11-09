@@ -1,7 +1,7 @@
 import { isAbsolute, resolve } from 'node:path';
 import { z } from 'zod';
 import { loadDomain } from '../parsers/index.js';
-import { PAYLOAD_META_KEY, VIEWS, type ShowDomainPayload } from '../shared/protocol.js';
+import { DEFAULT_VIEW, OPEN_VIEWS, PAYLOAD_META_KEY, type ShowDomainPayload } from '../shared/protocol.js';
 import { diskSource } from '../sources/disk.js';
 import { inlineSource } from '../sources/inline.js';
 import type { FileSource } from '../sources/types.js';
@@ -24,8 +24,11 @@ export const showDomainInput = z.object({
       }),
     )
     .optional()
-    .describe('Raw glossary Markdown files, for when the server cannot read the project. Pass exactly one of `path` or `files`.'),
-  view: z.enum(VIEWS).optional().describe('Which view to open. Defaults to "glossary".'),
+    .describe(
+      'Raw Markdown files, for when the server cannot read the project: glossary files and ADRs (e.g. "docs/adr/0001-slug.md", or a context\'s "src/billing/docs/adr/…"). Pass exactly one of `path` or `files`.',
+    ),
+  view: z.enum(OPEN_VIEWS).optional().describe('Which view to open: "home" (project name and its artifacts) or "glossary". Defaults to "home".'),
+  project: z.string().optional().describe('Project name shown at the top. Defaults to package.json `name`, then the folder name.'),
 });
 
 export type ShowDomainArgs = z.infer<typeof showDomainInput>;
@@ -66,8 +69,8 @@ export async function showDomain(args: ShowDomainArgs, deps: ShowDomainDeps): Pr
     source = inlineSource(args.files!);
   }
 
-  const model = await loadDomain(source);
-  const payload: ShowDomainPayload = { view: args.view ?? 'glossary', source: source.label, model };
+  const model = await loadDomain(source, { project: args.project });
+  const payload: ShowDomainPayload = { view: args.view ?? DEFAULT_VIEW, source: source.label, model };
   return { content: [{ type: 'text', text: summarize(model, source.label) }], _meta: { [PAYLOAD_META_KEY]: payload } };
 }
 

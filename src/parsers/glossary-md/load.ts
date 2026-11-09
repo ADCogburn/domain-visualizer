@@ -1,4 +1,4 @@
-import type { BoundedContext, DomainModel } from '../../model/types.js';
+import { emptyModel, type BoundedContext, type DomainModel } from '../../model/types.js';
 import { basename, dirname, resolveFrom } from '../../sources/paths.js';
 import type { FileSource } from '../../sources/types.js';
 import type { DomainParser } from '../types.js';
@@ -53,7 +53,7 @@ function pickGlossaries(paths: string[]): string[] {
 }
 
 async function loadSingle(source: FileSource, paths: string[]): Promise<DomainModel> {
-  const model: DomainModel = { contexts: [], relationships: [], warnings: [] };
+  const model = emptyModel();
   for (const path of paths) {
     const text = await source.read(path);
     if (text === undefined) {
@@ -66,7 +66,7 @@ async function loadSingle(source: FileSource, paths: string[]): Promise<DomainMo
 }
 
 async function loadMap(source: FileSource, mapPath: string): Promise<DomainModel> {
-  const model: DomainModel = { contexts: [], relationships: [], warnings: [] };
+  const model = emptyModel();
   const text = await source.read(mapPath);
   if (text === undefined) {
     model.warnings.push(`${mapPath}: could not be read`);

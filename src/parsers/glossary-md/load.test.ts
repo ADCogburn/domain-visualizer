@@ -61,6 +61,20 @@ describe('loadDomain from disk', () => {
     expect(m.warnings[0]).toMatch(/no GLOSSARY-MAP\.md, GLOSSARY\.md/);
   });
 
+  it('finds Project-wide and per-context ADRs', async () => {
+    const m = await loadDomain(await diskSource(join(fixtures, 'multi-context')));
+    expect(m.adrs.map((a) => [a.path, a.context, a.number, a.title, a.status])).toEqual([
+      ['docs/adr/0001-contexts-talk-through-events.md', null, 1, 'Contexts talk through events, not shared tables', 'accepted'],
+      ['src/billing/docs/adr/0001-one-invoice-per-order.md', 'Billing', 1, 'One Invoice per Order', null],
+    ]);
+  });
+
+  it('names the project from package.json, else the folder', async () => {
+    expect((await loadDomain(await diskSource(join(fixtures, '..')))).project).toBe('domain-visualizer-dev');
+    expect((await loadDomain(await diskSource(join(fixtures, 'legacy-context')))).project).toBe('legacy-context');
+    expect((await loadDomain(await diskSource(join(fixtures, 'legacy-context')), { project: 'Warehouse' })).project).toBe('Warehouse');
+  });
+
   it('throws for a missing path', async () => {
     await expect(diskSource(join(fixtures, 'nope'))).rejects.toThrow(/Path not found/);
   });
@@ -74,7 +88,9 @@ describe('loadDomain from inline files', () => {
     }));
     const inline = await loadDomain(inlineSource(files));
     const disk = await loadDomain(await diskSource(join(fixtures, 'multi-context')));
-    expect(inline).toEqual(disk);
+    expect(inline.project).toBe('Domain');
+    expect(disk.project).toBe('multi-context');
+    expect({ ...inline, project: '', adrs: [] }).toEqual({ ...disk, project: '', adrs: [] });
   });
 
   it('treats a single file as the glossary whatever its name', async () => {

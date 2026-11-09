@@ -55,15 +55,41 @@ export interface TermRelationship {
 
 export type Relationship = ContextRelationship | TermRelationship;
 
+/** An architecture decision record: one Markdown file under a `docs/adr/` folder. */
+export interface Adr {
+  /** Repo-relative path; unique, so it doubles as the ADR's id. */
+  path: string;
+  /** From the filename's leading digits (`0007-slug.md` -> 7), or null. */
+  number: number | null;
+  /** The H1, or the filename turned into words when there is none. */
+  title: string;
+  /** From `status:` frontmatter, e.g. "accepted", or null. */
+  status: string | null;
+  /** The Bounded Context whose folder the ADR sits in; null for Project-wide ADRs. */
+  context: string | null;
+  /** The first paragraph after the title, as plain text. */
+  summary: string;
+  /** The Markdown after the frontmatter and the H1. */
+  body: string;
+}
+
 export interface DomainModel {
+  /** The Project's display name. */
+  project: string;
   contexts: BoundedContext[];
   relationships: Relationship[];
+  adrs: Adr[];
   /** Human-readable problems found while reading the sources. */
   warnings: string[];
 }
 
-export function emptyModel(): DomainModel {
-  return { contexts: [], relationships: [], warnings: [] };
+export function emptyModel(project = 'Domain'): DomainModel {
+  return { project, contexts: [], relationships: [], adrs: [], warnings: [] };
+}
+
+/** 7 -> "0007", the way ADR filenames write it. */
+export function adrNumber(n: number): string {
+  return String(n).padStart(4, '0');
 }
 
 export function countTerms(model: DomainModel): number {

@@ -5,47 +5,7 @@
   gap: 12px;
 }
 
-/* Definition tooltip: fixed on <body>, positioned by tooltip.ts inside the iframe's viewport. */
-.gl-tip {
-  position: fixed;
-  z-index: 10;
-  box-sizing: border-box;
-  width: max-content;
-  padding: 8px 12px;
-  border-radius: var(--border-radius-md);
-  background: var(--color-background-primary);
-  border: var(--border-width-regular) solid var(--color-border-secondary);
-  box-shadow: 0 4px 14px rgb(0 0 0 / 0.14);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-  font-size: var(--font-text-sm-size);
-  line-height: var(--font-text-sm-line-height);
-  pointer-events: none;
-}
-.gl-tip[hidden] {
-  display: none;
-}
-.gl-tip p {
-  margin: 0;
-}
-.gl-tip-title {
-  margin-bottom: 2px !important;
-}
-.gl-tip-ctx,
-.gl-tip-meta {
-  color: var(--color-text-tertiary);
-}
-.gl-tip-meta {
-  margin-top: 4px !important;
-  font-size: var(--font-text-xs-size);
-}
-.gl-tip-avoided {
-  color: var(--color-text-tertiary);
-  text-decoration: line-through;
-}
-.gl-tip-def {
-  color: var(--color-text-secondary);
-}
+/* Term spans and the tooltip are styled in ../shared/terms.css. */
 
 .gl-list {
   display: grid;
@@ -123,32 +83,13 @@
   }
 }
 
-/* Glossary phrases */
-.gl-term,
-.gl-avoid {
-  border-radius: 2px;
-  cursor: help;
-  outline: none;
-}
-.gl-term {
-  text-decoration: underline dotted;
-  text-decoration-color: var(--color-text-tertiary);
-  text-underline-offset: 3px;
-}
-.gl-avoid {
-  color: var(--color-text-tertiary);
-  text-decoration: underline dotted;
-  text-decoration-color: var(--color-border-primary);
-  text-underline-offset: 3px;
+/* Here, clicking an avoided word jumps to its Term. */
+.gl-view .gl-avoid {
   cursor: pointer;
 }
-.gl-term:focus-visible,
-.gl-avoid:focus-visible,
 .gl-more:focus-visible {
+  outline: none;
   box-shadow: 0 0 0 2px var(--color-ring-info);
-}
-.gl-active {
-  background: var(--color-background-info);
 }
 
 .gl-more {

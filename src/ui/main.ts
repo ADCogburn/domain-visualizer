@@ -21,6 +21,9 @@ const shell = createShell(root, {
     mode = res.mode;
     return mode;
   },
+  openLink(url) {
+    void app.openLink({ url }).catch(() => undefined);
+  },
 });
 
 function applyContext(ctx: McpUiHostContext | undefined) {

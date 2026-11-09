@@ -97,10 +97,26 @@ body {
   font-size: var(--font-heading-md-size);
   font-weight: var(--font-weight-semibold);
 }
+:root[data-page='home'] .dv-title {
+  font-size: calc(var(--font-heading-md-size) * 1.25);
+  overflow-wrap: anywhere;
+}
+.dv-spacer {
+  flex: 1;
+}
+.dv-back {
+  border-color: transparent;
+  padding-left: 6px;
+  color: var(--color-text-secondary);
+}
+.dv-back:hover {
+  color: var(--color-text-primary);
+  background: var(--color-background-secondary);
+}
 .dv-meta {
   color: var(--color-text-tertiary);
   font-size: var(--font-text-sm-size);
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,6 +136,32 @@ body {
 .dv-button:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--color-ring-info);
+}
+
+/* ADR status pill (Home rows and the ADR page). */
+.dv-status {
+  display: inline-block;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: var(--border-width-regular) solid var(--color-border-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--font-text-xs-size);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+.dv-status[data-status='accepted'] {
+  color: var(--color-text-info);
+  border-color: currentColor;
+  background: var(--color-background-info);
+}
+.dv-status[data-status='deprecated'],
+.dv-status[data-status='superseded'],
+.dv-status[data-status='rejected'] {
+  color: var(--color-text-tertiary);
+  border-style: dashed;
 }
 
 .dv-warnings {
