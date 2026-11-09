@@ -67,24 +67,45 @@ describe('glossaryView', () => {
     expect(root.querySelector('#gl-identity--account .gl-def .gl-term')!.textContent).toBe('customer');
   });
 
-  it('shows the definition in the strip on focus, and redirects avoided words', () => {
+  it('shows the definition in a tooltip on hover or focus, and redirects avoided words', () => {
     const root = document.createElement('div');
     document.body.append(root);
     glossaryView.render(root, model, ctx({ displayMode: 'fullscreen' }));
-    const strip = root.querySelector('.gl-strip')!;
-    expect(strip.textContent).toMatch(/Hover or focus/);
+    const tip = document.querySelector<HTMLElement>('.gl-tip')!;
+    expect(tip.hidden).toBe(true);
+    expect(tip.getAttribute('role')).toBe('tooltip');
 
-    root.querySelector<HTMLElement>('#gl-billing--invoice dt .gl-term')!.focus();
-    expect(strip.querySelector('strong')!.textContent).toBe('Invoice');
-    expect(strip.textContent).toContain('A request for payment sent to a customer after delivery.');
+    const invoice = root.querySelector<HTMLElement>('#gl-billing--invoice dt .gl-term')!;
+    invoice.focus();
+    expect(tip.hidden).toBe(false);
+    expect(invoice.getAttribute('aria-describedby')).toBe(tip.id);
+    expect(tip.querySelector('strong')!.textContent).toBe('Invoice');
+    expect(tip.textContent).toContain('A request for payment sent to a customer after delivery.');
+
+    invoice.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(tip.hidden).toBe(true);
+    expect(invoice.hasAttribute('aria-describedby')).toBe(false);
+    invoice.blur();
 
     const bill = [...root.querySelectorAll<HTMLElement>('.gl-avoid')].find((s) => s.textContent === 'Bill')!;
     bill.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-    expect(strip.textContent).toMatch(/“Bill” is avoided\. Use Invoice/);
+    expect(tip.hidden).toBe(false);
+    expect(tip.textContent).toMatch(/“Bill” is avoided\. Use Invoice/);
+    bill.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: root }));
+    expect(tip.hidden).toBe(true);
 
     bill.click();
     expect(document.activeElement!.textContent).toBe('Invoice');
     expect(root.querySelector('#gl-billing--invoice')!.classList.contains('gl-flash')).toBe(true);
+  });
+
+  it('keeps one tooltip per document across re-renders', () => {
+    const root = document.createElement('div');
+    document.body.append(root);
+    glossaryView.render(root, model, ctx());
+    root.querySelector<HTMLButtonElement>('.gl-more')?.click();
+    glossaryView.render(root, model, ctx({ displayMode: 'fullscreen' }));
+    expect(document.querySelectorAll('.gl-tip')).toHaveLength(1);
   });
 
   it('caps inline cards and asks for full screen to show the rest', () => {
