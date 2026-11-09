@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+*.log
+*.tsbuildinfo
+.vite/
+.DS_Store
+Thumbs.db
+*.zip
+.env
+.env.*
+
+# Local Claude settings (launch.json is shared)
+.claude/settings.local.json
+
+# The built server IS committed: plugins are installed with no build step.
+!plugins/domain-visualizer/server/server.js

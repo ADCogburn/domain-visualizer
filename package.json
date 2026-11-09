@@ -1,0 +1,38 @@
+{
+  "name": "domain-visualizer-dev",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Source and build tooling for the domain-visualizer Claude plugin",
+  "author": "Andrew",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:ui": "vite",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "build:ui": "vite build",
+    "build:server": "node scripts/build-server.mjs",
+    "build": "npm run build:ui && npm run build:server",
+    "validate": "claude plugin validate plugins/domain-visualizer",
+    "inspect": "node scripts/inspect.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/core": "2.4.0",
+    "@modelcontextprotocol/ext-apps": "2.0.4",
+    "@modelcontextprotocol/server": "2.4.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "esbuild": "0.28.2",
+    "jsdom": "31.0.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.7",
+    "vite-plugin-singlefile": "2.3.4",
+    "vitest": "5.1.0"
+  }
+}
