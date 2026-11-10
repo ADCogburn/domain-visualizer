@@ -193,6 +193,13 @@ describe('glossaryView', () => {
         return root.querySelector<HTMLButtonElement>('.dv-chat-copy')!;
       };
 
+      it('is an icon button named "Copy"', () => {
+        const copy = openInvoice(render());
+        expect(copy.getAttribute('aria-label')).toBe('Copy');
+        expect(copy.querySelector('svg')).not.toBeNull();
+        expect(copy.textContent).toBe('');
+      });
+
       it('copies the text and briefly says "Copied"', async () => {
         vi.useFakeTimers();
         const writeText = vi.fn(async () => {});
@@ -201,9 +208,11 @@ describe('glossaryView', () => {
         copy.click();
         await vi.advanceTimersByTimeAsync(0);
         expect(writeText).toHaveBeenCalledWith('I want to ask about the Term "Invoice" (Billing).');
-        expect(copy.textContent).toBe('Copied');
+        expect(copy.getAttribute('aria-label')).toBe('Copied');
+        expect(copy.dataset.state).toBe('copied');
         await vi.advanceTimersByTimeAsync(3000);
-        expect(copy.textContent).toBe('Copy');
+        expect(copy.getAttribute('aria-label')).toBe('Copy');
+        expect(copy.dataset.state).toBe('idle');
       });
 
       it('selects the text and asks for Ctrl+C when the host blocks the clipboard', async () => {

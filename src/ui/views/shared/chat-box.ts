@@ -68,7 +68,8 @@ export function createChatBoxes(doc: Document): ChatBoxes {
         close();
         if (same) return;
         const p = el(doc, 'p', { class: 'dv-chat-text' }, text);
-        const copy = el(doc, 'button', { type: 'button', class: 'dv-chat-copy' }, 'Copy');
+        const copy = el(doc, 'button', { type: 'button', class: 'dv-chat-copy' });
+        setCopyState(copy, 'idle');
         copy.addEventListener('click', () => void copyText(doc, p, copy));
         const box = el(doc, 'div', { class: 'dv-chat-box', id }, p, copy);
         container.append(box);
@@ -80,8 +81,43 @@ export function createChatBoxes(doc: Document): ChatBoxes {
   };
 }
 
-/** How long "Copied" shows before the button reads "Copy" again. */
+/** How long the "Copied" check shows before the button shows the copy icon again. */
 const COPIED_MS = 1500;
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+/** Lucide-style 24×24 strokes: two overlapping sheets (copy) and a check (copied). */
+const ICONS = {
+  idle: ['M8 8h12v12H8z', 'M16 8V4H4v12h4'],
+  copied: ['M5 12.5l4.5 4.5L19 7.5'],
+} as const;
+
+/**
+ * The copy button shows an icon (copy, then a check once copied), named by aria-label and
+ * a hover title. When the host blocks the clipboard it says in words how to copy by hand.
+ */
+function setCopyState(btn: HTMLButtonElement, state: 'idle' | 'copied' | 'manual', manualText = '') {
+  const doc = btn.ownerDocument;
+  btn.dataset.state = state;
+  if (state === 'manual') {
+    btn.removeAttribute('aria-label');
+    btn.removeAttribute('title');
+    btn.textContent = manualText;
+    return;
+  }
+  const label = state === 'copied' ? 'Copied' : 'Copy';
+  btn.setAttribute('aria-label', label);
+  btn.title = label;
+  const svg = doc.createElementNS(SVG_NS, 'svg');
+  for (const [k, v] of Object.entries({ viewBox: '0 0 24 24', width: '16', height: '16', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' })) {
+    svg.setAttribute(k, v);
+  }
+  for (const d of ICONS[state]) {
+    const path = doc.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', d);
+    svg.append(path);
+  }
+  btn.replaceChildren(svg);
+}
 const resets = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
 
 /**
@@ -106,15 +142,15 @@ async function copyText(doc: Document, p: HTMLElement, btn: HTMLButtonElement) {
   }
   if (!btn.isConnected) return;
   if (ok) {
-    btn.textContent = 'Copied';
+    setCopyState(btn, 'copied');
     resets.set(
       btn,
-      setTimeout(() => (btn.textContent = 'Copy'), COPIED_MS),
+      setTimeout(() => setCopyState(btn, 'idle'), COPIED_MS),
     );
   } else {
     select(doc, p);
     const mac = /Mac|iPhone|iPad/.test(win?.navigator.platform ?? '');
-    btn.textContent = `Press ${mac ? '⌘C' : 'Ctrl+C'} to copy`;
+    setCopyState(btn, 'manual', `Press ${mac ? '⌘C' : 'Ctrl+C'} to copy`);
   }
 }
 

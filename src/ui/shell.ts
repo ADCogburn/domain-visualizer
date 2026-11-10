@@ -48,7 +48,13 @@ export function createShell(root: HTMLElement, host: HostAdapter): Shell {
     const header = doc.createElement('header');
     header.className = 'dv-header';
     if (route.view === 'home') {
-      header.append(title(model.project, payload.source));
+      const heading = doc.createElement('div');
+      heading.className = 'dv-heading';
+      const eyebrow = doc.createElement('p');
+      eyebrow.className = 'dv-eyebrow';
+      eyebrow.textContent = 'Project';
+      heading.append(eyebrow, title(model.project, payload.source));
+      header.append(heading);
     } else {
       const back = button('← Home', 'dv-back');
       back.addEventListener('click', () => navigate({ view: 'home' }));

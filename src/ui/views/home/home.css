@@ -1,41 +1,72 @@
-/* Home view. Host tokens only (see src/ui/styles.css for fallbacks). */
+/*
+ * Home view. Host tokens only (see src/ui/styles.css for fallbacks).
+ * Look: a quiet console. Mono, uppercase section labels with a hairline rule; cards with
+ * sharp corners and accent corner ticks that light up on hover. The accent is the host's
+ * info colour, so it follows light and dark themes.
+ */
 
 .hm-artifacts {
+  --hm-accent: var(--color-text-info);
+  --hm-card-bg: color-mix(in srgb, var(--color-background-secondary) 55%, transparent);
+  --hm-radius: 4px;
   display: grid;
-  gap: 8px;
+  gap: 12px;
 }
-.hm-heading {
-  margin: 0;
-  font-size: var(--font-text-xs-size);
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-tertiary);
-}
-.hm-subheading {
+
+/* Section labels: "// ARTIFACTS ──────" */
+.hm-heading,
+.hm-subheading,
+.hm-group {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 10px 0 0;
-  font-size: var(--font-heading-sm-size);
-  line-height: var(--font-heading-sm-line-height);
-  font-weight: var(--font-weight-semibold);
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+.hm-heading::before,
+.hm-subheading::before {
+  content: '//';
+  letter-spacing: 0;
+  color: var(--hm-accent);
+}
+.hm-heading::after,
+.hm-subheading::after {
+  content: '';
+  flex: 1;
+  height: 0;
+  border-top: var(--border-width-regular) solid var(--color-border-tertiary);
+}
+.hm-subheading {
+  margin-top: 24px;
 }
 .hm-count {
-  min-width: 1.6em;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--color-background-secondary);
+  order: 1; /* after the rule */
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+.hm-count::before {
+  content: '[';
   color: var(--color-text-tertiary);
-  font-size: var(--font-text-xs-size);
-  font-weight: var(--font-weight-medium);
-  text-align: center;
+}
+.hm-count::after {
+  content: ']';
+  color: var(--color-text-tertiary);
 }
 .hm-group {
-  margin: 4px 0 0;
-  font-size: var(--font-text-xs-size);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-tertiary);
+  margin-top: 8px;
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+}
+.hm-group::before {
+  content: '▸';
+  color: var(--hm-accent);
 }
 
 .hm-list {
@@ -43,83 +74,178 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 6px;
+  gap: 10px;
 }
+
+/* Card: the <li>. Corner ticks are two small L shapes drawn with gradients. */
+.hm-card {
+  position: relative;
+  display: grid;
+  background: var(--hm-card-bg);
+  border: var(--border-width-regular) solid var(--color-border-tertiary);
+  border-radius: var(--hm-radius);
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.hm-card::before,
+.hm-card::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  opacity: 0.35;
+  transition: opacity 140ms ease;
+  --tick: linear-gradient(var(--hm-accent), var(--hm-accent));
+  background: var(--tick), var(--tick);
+  background-repeat: no-repeat;
+}
+.hm-card::before {
+  top: -1px;
+  left: -1px;
+  background-size: 10px 1.5px, 1.5px 10px;
+  background-position: top left, top left;
+}
+.hm-card::after {
+  right: -1px;
+  bottom: -1px;
+  background-size: 10px 1.5px, 1.5px 10px;
+  background-position: bottom right, bottom right;
+}
+.hm-card:has(> button.hm-row:hover),
+.hm-card:has(> button.hm-row:focus-visible) {
+  background: var(--color-background-secondary);
+  border-color: color-mix(in srgb, var(--hm-accent) 45%, var(--color-border-tertiary));
+}
+.hm-card:has(> button.hm-row:hover)::before,
+.hm-card:has(> button.hm-row:hover)::after,
+.hm-card:has(> button.hm-row:focus-visible)::before,
+.hm-card:has(> button.hm-row:focus-visible)::after {
+  opacity: 1;
+}
+.hm-card-empty {
+  border-style: dashed;
+  background: transparent;
+}
+.hm-card-empty::before,
+.hm-card-empty::after {
+  display: none;
+}
+
+/* The clickable part of a card. */
 .hm-row {
   display: grid;
-  gap: 2px;
+  gap: 6px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 16px 18px;
   font: inherit;
   text-align: left;
   color: var(--color-text-primary);
   background: transparent;
-  border: var(--border-width-regular) solid var(--color-border-tertiary);
-  border-radius: var(--border-radius-md);
+  border: 0;
+  border-radius: var(--hm-radius);
   cursor: pointer;
-  transition: background-color 120ms ease, border-color 120ms ease;
 }
-button.hm-row:hover {
-  background: var(--color-background-secondary);
-  border-color: var(--color-border-secondary);
+.hm-row-empty {
+  cursor: default;
 }
 button.hm-row:focus-visible,
 .hm-more:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--color-ring-info);
 }
-/* ADR rows: "Chat about this" sits in the row's top-right corner; its box opens below the row. */
-.hm-item {
-  position: relative;
-  display: grid;
-}
-.hm-item > .hm-row {
-  /* Room for the button: "Chat about this" at the xs size, its padding and a gap. */
-  padding-right: 120px;
-}
-.hm-item > .dv-chat-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-}
-@container (max-width: 420px) {
-  .hm-item > .hm-row {
-    padding-right: 12px;
-  }
-  .hm-item > .dv-chat-btn {
-    position: static;
-    justify-self: end;
-    margin-top: 4px;
-  }
-}
-.hm-row-empty {
-  cursor: default;
-  border-style: dashed;
-}
-.hm-row-title {
+
+/* Tag line above an ADR title: "ADR 0001  ● ACCEPTED". "Chat about this" sits at its right end. */
+.hm-tags {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 4px 8px;
-  min-width: 0;
-}
-.hm-title-text {
-  font-weight: var(--font-weight-semibold);
-  min-width: 0;
+  gap: 4px 10px;
+  min-height: 22px;
+  padding-right: 120px; /* room for "Chat about this" */
 }
 .hm-num {
   font-family: var(--font-mono);
-  font-size: var(--font-text-xs-size);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: var(--hm-accent);
+}
+.hm-num::before {
+  content: 'ADR ';
   color: var(--color-text-tertiary);
+}
+.hm-card .dv-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 7px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  line-height: 18px;
+  text-transform: uppercase;
+}
+.hm-card .dv-status::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.hm-card .dv-status[data-status='accepted']::before {
+  box-shadow: 0 0 5px currentColor;
+}
+.hm-item > .dv-chat-btn {
+  position: absolute;
+  top: 13px;
+  right: 12px;
+}
+/* An ADR with neither number nor status has no tag line: keep the title clear of the button. */
+.hm-item:not(:has(.hm-tags)) .hm-row-title {
+  padding-right: 120px;
+}
+.hm-item > .dv-chat-box {
+  margin: 0 12px 12px;
+}
+
+.hm-row-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+.hm-title-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-text-md-size);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.hm-arrow {
+  flex: none;
+  font-family: var(--font-mono);
+  color: var(--color-text-tertiary);
+  transition: transform 140ms ease, color 140ms ease;
+}
+button.hm-row:hover .hm-arrow,
+button.hm-row:focus-visible .hm-arrow {
+  color: var(--hm-accent);
+  transform: translateX(3px);
 }
 .hm-row-meta,
 .hm-summary {
   margin: 0;
   font-size: var(--font-text-sm-size);
-  line-height: var(--font-text-sm-line-height);
+  line-height: 1.6;
   color: var(--color-text-secondary);
 }
 .hm-row-meta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--color-text-tertiary);
 }
 .hm-summary {
@@ -129,17 +255,32 @@ button.hm-row:focus-visible,
   line-clamp: 2;
   overflow: hidden;
 }
+:root[data-display-mode='fullscreen'] .hm-summary {
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
 
 .hm-more {
   justify-self: start;
-  min-height: 32px;
-  padding: 4px 12px;
+  min-height: 34px;
+  margin-top: 4px;
+  padding: 6px 14px;
   font: inherit;
-  font-size: var(--font-text-sm-size);
-  font-weight: var(--font-weight-medium);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--color-text-primary);
-  background: var(--color-background-secondary);
+  background: transparent;
   border: var(--border-width-regular) solid var(--color-border-secondary);
-  border-radius: var(--border-radius-md);
+  border-radius: var(--hm-radius);
   cursor: pointer;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+.hm-more::after {
+  content: ' →';
+}
+.hm-more:hover {
+  color: var(--hm-accent);
+  border-color: var(--hm-accent);
 }
