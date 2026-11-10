@@ -1,5 +1,7 @@
 import { buildIndex } from '../../../model/term-index.js';
 import { countTerms, type BoundedContext, type DomainModel } from '../../../model/types.js';
+import { contextPrompt, createChatBoxes, termPrompt, type ChatBoxes } from '../shared/chat-box.js';
+import { el } from '../shared/dom.js';
 import { markup, termSpan } from '../shared/highlight.js';
 import { attachTermTooltips, termTarget } from '../shared/term-hover.js';
 import type { DomainView, ViewContext } from '../types.js';
@@ -38,6 +40,7 @@ function renderGlossary(root: HTMLElement, model: DomainModel, ctx: ViewContext,
   const full = ctx.displayMode === 'fullscreen';
   const index = buildIndex(model);
   const multi = model.contexts.length > 1;
+  const chat = createChatBoxes(doc);
 
   const wrap = el(doc, 'div', { class: `gl-view ${full ? 'gl-full' : 'gl-inline'}` });
   const list = el(doc, 'div', { class: 'gl-list' });
@@ -46,7 +49,7 @@ function renderGlossary(root: HTMLElement, model: DomainModel, ctx: ViewContext,
   let shown = 0;
   for (const c of model.contexts) {
     if (shown >= limit) break;
-    const section = renderContext(doc, c, multi, limit - shown);
+    const section = renderContext(doc, c, multi, limit - shown, chat);
     shown += Math.min(c.terms.length, limit - shown);
     list.append(section);
   }
@@ -101,10 +104,12 @@ function renderGlossary(root: HTMLElement, model: DomainModel, ctx: ViewContext,
   });
 }
 
-function renderContext(doc: Document, c: BoundedContext, multi: boolean, limit: number): HTMLElement {
+function renderContext(doc: Document, c: BoundedContext, multi: boolean, limit: number, chat: ChatBoxes): HTMLElement {
   const section = el(doc, 'section', { class: 'gl-context', 'data-context': c.name });
   const head = el(doc, 'header', { class: 'gl-context-head' });
-  if (multi || c.description) head.append(el(doc, 'h2', {}, c.name));
+  if (multi || c.description) {
+    head.append(el(doc, 'div', { class: 'gl-context-title' }, el(doc, 'h2', {}, c.name), chat.button(contextPrompt(c.name), head, c.name)));
+  }
   if (c.source) head.append(el(doc, 'span', { class: 'gl-source', 'data-gl-skip': '' }, c.source));
   const about = c.purpose || c.description;
   if (about) head.append(el(doc, 'p', { class: 'gl-desc', 'data-markup': '' }, about));
@@ -119,7 +124,8 @@ function renderContext(doc: Document, c: BoundedContext, multi: boolean, limit: 
     }
     const entry = el(doc, 'div', { class: 'gl-entry', id: entryId(t.context, t.name) });
     entry.append(el(doc, 'dt', {}, termSpan(doc, t.name, 'term', t.name, t.context)));
-    entry.append(el(doc, 'dd', { class: 'gl-def', 'data-markup': '' }, t.definition || '(no definition)'));
+    // At the end of the definition, so the term column keeps one width (markup() skips buttons).
+    entry.append(el(doc, 'dd', { class: 'gl-def', 'data-markup': '' }, t.definition || '(no definition)', ' ', chat.button(termPrompt(t), entry, t.name)));
     if (t.avoid.length) {
       const dd = el(doc, 'dd', { class: 'gl-avoid-list' }, el(doc, 'span', { class: 'gl-avoid-label' }, 'Avoid: '));
       t.avoid.forEach((a, i) => {
@@ -146,10 +152,3 @@ function jumpTo(root: HTMLElement, context: string, term: string) {
 
 const entryId = (context: string, term: string) => `gl-${slug(context)}--${slug(term)}`;
 const slug = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-');
-
-function el(doc: Document, tag: string, attrs: Record<string, string> = {}, ...children: (Node | string)[]): HTMLElement {
-  const node = doc.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
-  node.append(...children);
-  return node;
-}

@@ -13,6 +13,7 @@ vi.mock('./views/glossary/glossary.css', () => ({}));
 vi.mock('./views/home/home.css', () => ({}));
 vi.mock('./views/adr/adr.css', () => ({}));
 vi.mock('./views/shared/terms.css', () => ({}));
+vi.mock('./views/shared/chat.css', () => ({}));
 
 const fixture = join(import.meta.dirname, '../../fixtures/single-context');
 const files = ['GLOSSARY.md', 'docs/adr/0001-invoices-are-immutable.md', 'docs/adr/0002-payments-settle-oldest-invoice-first.md'].map((p) => ({
@@ -101,6 +102,25 @@ describe('Home', () => {
     }).then(() => expect(root.querySelector('.hm-artifacts')).not.toBeNull());
   });
 
+  it('offers "Chat about this" on ADR rows, not on the Glossary row', () => {
+    model.adrs = [model.adrs[0]!, { ...model.adrs[1]!, number: null, title: 'Unnumbered decision' }];
+    show();
+    expect(root.querySelector('[data-artifact="glossary"]')!.closest('li')!.querySelector('.dv-chat-btn')).toBeNull();
+    const item = (n: string) => adrRow(n).closest('li')!;
+    const chat = (n: string) => item(n).querySelector<HTMLButtonElement>('.dv-chat-btn')!;
+
+    chat('0001-invoices-are-immutable.md').click();
+    expect(host.requestDisplayMode).not.toHaveBeenCalled(); // the row itself wasn't opened
+    expect(item('0001-invoices-are-immutable.md').querySelector('.dv-chat-text')!.textContent).toBe(
+      'I want to ask about the ADR 0001-Invoices are immutable once sent',
+    );
+    chat('0002-payments-settle-oldest-invoice-first.md').click();
+    expect(root.querySelectorAll('.dv-chat-box')).toHaveLength(1);
+    expect(item('0002-payments-settle-oldest-invoice-first.md').querySelector('.dv-chat-text')!.textContent).toBe(
+      'I want to ask about the ADR Unnumbered decision',
+    );
+  });
+
   it('opens on the Glossary when the tool asked for it', () => {
     show('glossary');
     expect(root.querySelector('.gl-view')).not.toBeNull();
@@ -166,6 +186,14 @@ describe('ADR page', () => {
     await flush();
     expect(root.querySelector('.adr-title')!.textContent).toBe('Payments settle the oldest Invoice first');
     expect(root.querySelector('.adr-prose blockquote')).not.toBeNull();
+  });
+
+  it('offers "Chat about this" on the ADR title', async () => {
+    await open();
+    const head = root.querySelector<HTMLElement>('.adr-head')!;
+    head.querySelector<HTMLButtonElement>('.dv-chat-btn')!.click();
+    expect(head.querySelector('.dv-chat-text')!.textContent).toBe('I want to ask about the ADR 0001-Invoices are immutable once sent');
+    expect(root.querySelector('.adr-prose .dv-chat-btn')).toBeNull();
   });
 
   it('goes back to Home', async () => {

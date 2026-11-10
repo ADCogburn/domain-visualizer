@@ -54,6 +54,15 @@
 .gl-entry dt {
   font-weight: var(--font-weight-semibold);
 }
+.gl-def .dv-chat-btn {
+  vertical-align: baseline;
+}
+.gl-context-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
 .gl-entry dd {
   margin: 0;
   grid-column: 2;
