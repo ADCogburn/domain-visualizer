@@ -37,6 +37,19 @@
   font-weight: var(--font-weight-semibold);
   text-wrap: balance;
 }
+.adr-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+/* One item on this page, so its button always shows. */
+.adr-head.dv-chat-scope .dv-chat-btn[aria-expanded] {
+  opacity: 1;
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-tertiary);
+}
 .adr-path {
   margin: 0;
   font-family: var(--font-mono);

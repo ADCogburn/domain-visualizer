@@ -1,6 +1,7 @@
 import { buildIndex } from '../../../model/term-index.js';
 import { adrNumber, type Adr, type DomainModel } from '../../../model/types.js';
 import { statusBadge } from '../shared/badge.js';
+import { adrPrompt, createChatBoxes, type ChatBoxes } from '../shared/chat-box.js';
 import { markup } from '../shared/highlight.js';
 import { attachTermTooltips } from '../shared/term-hover.js';
 import type { DomainView, ViewContext } from '../types.js';
@@ -25,7 +26,7 @@ export const adrView: DomainView = {
     }
 
     const article = el(doc, 'article', { class: `adr-view ${ctx.displayMode === 'fullscreen' ? 'adr-full' : 'adr-inline'}` });
-    article.append(head(doc, adr));
+    article.append(head(doc, adr, createChatBoxes(doc)));
 
     const prose = el(doc, 'div', { class: 'adr-prose' });
     prose.innerHTML = renderMarkdown(adr.body);
@@ -40,12 +41,13 @@ export const adrView: DomainView = {
   },
 };
 
-function head(doc: Document, adr: Adr): HTMLElement {
+function head(doc: Document, adr: Adr, chat: ChatBoxes): HTMLElement {
   const header = el(doc, 'header', { class: 'adr-head' });
   const kicker = el(doc, 'p', { class: 'adr-kicker' }, adr.number === null ? 'ADR' : `ADR ${adrNumber(adr.number)}`);
   if (adr.context) kicker.append(el(doc, 'span', { class: 'adr-ctx' }, ` · ${adr.context}`));
   if (adr.status) kicker.append(statusBadge(doc, adr.status));
-  header.append(kicker, el(doc, 'h1', { class: 'adr-title' }, adr.title), el(doc, 'p', { class: 'adr-path' }, adr.path));
+  const title = el(doc, 'div', { class: 'adr-title-row' }, el(doc, 'h1', { class: 'adr-title' }, adr.title), chat.button(adrPrompt(adr), header, adr.title));
+  header.append(kicker, title, el(doc, 'p', { class: 'adr-path' }, adr.path));
   return header;
 }
 

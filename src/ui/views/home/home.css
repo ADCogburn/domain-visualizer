@@ -68,6 +68,30 @@ button.hm-row:focus-visible,
   outline: none;
   box-shadow: 0 0 0 2px var(--color-ring-info);
 }
+/* ADR rows: "Chat about this" sits in the row's top-right corner; its box opens below the row. */
+.hm-item {
+  position: relative;
+  display: grid;
+}
+.hm-row-chat {
+  padding-right: 120px;
+}
+.hm-item > .dv-chat-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+@container (max-width: 420px) {
+  .hm-row-chat {
+    padding-right: 12px;
+  }
+  .hm-item.dv-chat-scope > .dv-chat-btn[aria-expanded] {
+    position: static;
+    justify-self: end;
+    margin-top: 4px;
+    opacity: 1;
+  }
+}
 .hm-row-empty {
   cursor: default;
   border-style: dashed;

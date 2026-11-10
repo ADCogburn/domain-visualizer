@@ -1,5 +1,6 @@
 import { adrNumber, countTerms, type Adr, type DomainModel } from '../../../model/types.js';
 import { statusBadge } from '../shared/badge.js';
+import { adrPrompt, createChatBoxes, type ChatBoxes } from '../shared/chat-box.js';
 import type { DomainView, ViewContext } from '../types.js';
 import './home.css';
 
@@ -39,6 +40,7 @@ function renderHome(root: HTMLElement, model: DomainModel, ctx: ViewContext, exp
   section.append(list);
 
   const adrs = model.adrs ?? [];
+  const chat = createChatBoxes(doc);
   if (adrs.length) {
     const limit = ctx.displayMode === 'fullscreen' || expanded ? Infinity : ADR_INLINE_LIMIT;
     const head = el(doc, 'h3', { class: 'hm-subheading' }, 'Architecture decisions');
@@ -52,7 +54,7 @@ function renderHome(root: HTMLElement, model: DomainModel, ctx: ViewContext, exp
       if (shown >= limit) break;
       if (labelled) section.append(el(doc, 'p', { class: 'hm-group' }, context ?? 'Project-wide'));
       const ul = el(doc, 'ul', { class: 'hm-list' });
-      for (const a of items.slice(0, limit - shown)) ul.append(el(doc, 'li', {}, adrRow(doc, a, ctx)));
+      for (const a of items.slice(0, limit - shown)) ul.append(adrItem(doc, a, ctx, chat));
       shown += Math.min(items.length, limit - shown);
       section.append(ul);
     }
@@ -79,15 +81,18 @@ function glossaryRow(doc: Document, model: DomainModel, ctx: ViewContext): HTMLE
   return row;
 }
 
-function adrRow(doc: Document, a: Adr, ctx: ViewContext): HTMLElement {
+/** An ADR row that opens its page, with "Chat about this" beside it (a button can't hold another button). */
+function adrItem(doc: Document, a: Adr, ctx: ViewContext, chat: ChatBoxes): HTMLElement {
   const title = el(doc, 'span', { class: 'hm-row-title' });
   if (a.number !== null) title.append(el(doc, 'span', { class: 'hm-num' }, adrNumber(a.number)));
   title.append(el(doc, 'span', { class: 'hm-title-text' }, a.title));
   if (a.status) title.append(statusBadge(doc, a.status));
-  const row = el(doc, 'button', { type: 'button', class: 'hm-row', 'data-adr': a.path, title: a.path }, title);
+  const row = el(doc, 'button', { type: 'button', class: 'hm-row hm-row-chat', 'data-adr': a.path, title: a.path }, title);
   if (a.summary) row.append(el(doc, 'p', { class: 'hm-summary' }, a.summary));
   row.addEventListener('click', () => ctx.navigate({ view: 'adr', adr: a.path }, { fullscreen: true }));
-  return row;
+  const item = el(doc, 'li', { class: 'hm-item' }, row);
+  item.append(chat.button(adrPrompt(a), item, a.title));
+  return item;
 }
 
 /** Project-wide ADRs first, then each Bounded Context in first-seen order. */

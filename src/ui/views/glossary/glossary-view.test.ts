@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildIndex } from '../../../model/term-index.js';
 import type { DomainModel } from '../../../model/types.js';
 import { loadDomain } from '../../../parsers/index.js';
@@ -11,6 +11,7 @@ import { markup } from '../shared/highlight.js';
 
 vi.mock('./glossary.css', () => ({}));
 vi.mock('../shared/terms.css', () => ({}));
+vi.mock('../shared/chat.css', () => ({}));
 
 let model: DomainModel;
 beforeEach(async () => {
@@ -123,6 +124,100 @@ describe('glossaryView', () => {
     expect(root.querySelectorAll('.gl-entry')).toHaveLength(INLINE_LIMIT);
     root.querySelector<HTMLButtonElement>('.gl-more')!.click();
     expect(c.requestDisplayMode).toHaveBeenCalledWith('fullscreen');
+  });
+
+  describe('Chat about this', () => {
+    const render = () => {
+      const root = document.createElement('div');
+      document.body.append(root);
+      glossaryView.render(root, model, ctx({ displayMode: 'fullscreen' }));
+      return root;
+    };
+    const boxes = (root: HTMLElement) => root.querySelectorAll<HTMLElement>('.dv-chat-box');
+
+    it('opens a box under a Term with ready-made text', () => {
+      const root = render();
+      const entry = root.querySelector<HTMLElement>('#gl-billing--invoice')!;
+      const btn = entry.querySelector<HTMLButtonElement>('.dv-chat-btn')!;
+      expect(btn.textContent).toBe('Chat about this');
+      btn.click();
+      expect(btn.getAttribute('aria-expanded')).toBe('true');
+      expect(entry.querySelector('.dv-chat-text')!.textContent).toBe('I want to ask about the Term "Invoice" (Billing).');
+    });
+
+    it('opens a box under a Bounded Context heading, but not on Avoided Words', () => {
+      const root = render();
+      const head = root.querySelector<HTMLElement>('[data-context="Identity"] .gl-context-head')!;
+      head.querySelector<HTMLButtonElement>('.dv-chat-btn')!.click();
+      expect(head.querySelector('.dv-chat-text')!.textContent).toBe('I want to ask about the Bounded Context "Identity".');
+      expect(root.querySelector('.gl-avoid-list .dv-chat-btn')).toBeNull();
+    });
+
+    it('keeps one box open at a time; clicking the same item again closes it', () => {
+      const root = render();
+      const invoice = root.querySelector<HTMLButtonElement>('#gl-billing--invoice .dv-chat-btn')!;
+      const account = root.querySelector<HTMLButtonElement>('#gl-identity--account .dv-chat-btn')!;
+      invoice.click();
+      account.click();
+      expect(boxes(root)).toHaveLength(1);
+      expect(boxes(root)[0]!.closest('#gl-identity--account')).not.toBeNull();
+      expect(invoice.getAttribute('aria-expanded')).toBe('false');
+      account.click();
+      expect(boxes(root)).toHaveLength(0);
+      expect(account.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('closes on Escape and puts focus back on the button', () => {
+      const root = render();
+      const invoice = root.querySelector<HTMLButtonElement>('#gl-billing--invoice .dv-chat-btn')!;
+      invoice.click();
+      root.querySelector<HTMLElement>('.dv-chat-box button')!.focus();
+      document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(boxes(root)).toHaveLength(0);
+      expect(document.activeElement).toBe(invoice);
+
+      invoice.click();
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(boxes(root)).toHaveLength(0);
+    });
+
+    describe('copy', () => {
+      const clipboard = (writeText: (text: string) => Promise<void>) =>
+        Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+      afterEach(() => {
+        Reflect.deleteProperty(navigator, 'clipboard');
+        vi.useRealTimers();
+      });
+      const openInvoice = (root: HTMLElement) => {
+        root.querySelector<HTMLButtonElement>('#gl-billing--invoice .dv-chat-btn')!.click();
+        return root.querySelector<HTMLButtonElement>('.dv-chat-copy')!;
+      };
+
+      it('copies the text and briefly says "Copied"', async () => {
+        vi.useFakeTimers();
+        const writeText = vi.fn(async () => {});
+        clipboard(writeText);
+        const copy = openInvoice(render());
+        copy.click();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(writeText).toHaveBeenCalledWith('I want to ask about the Term "Invoice" (Billing).');
+        expect(copy.textContent).toBe('Copied');
+        await vi.advanceTimersByTimeAsync(3000);
+        expect(copy.textContent).toBe('Copy');
+      });
+
+      it('selects the text and asks for Ctrl+C when the host blocks the clipboard', async () => {
+        clipboard(async () => {
+          throw new DOMException('blocked', 'NotAllowedError');
+        });
+        const root = render();
+        const copy = openInvoice(root);
+        copy.click();
+        await new Promise((r) => setTimeout(r, 0));
+        expect(copy.textContent).toBe('Press Ctrl+C to copy');
+        expect(document.getSelection()!.toString()).toBe('I want to ask about the Term "Invoice" (Billing).');
+      });
+    });
   });
 
   it('expands in place when the host has no full screen', () => {
