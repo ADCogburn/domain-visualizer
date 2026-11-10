@@ -76,6 +76,7 @@ describe.skipIf(!existsSync(bundle))('built server (stdio)', () => {
       const r = await request('tools/call', { name: 'show_domain', arguments: { path: `fixtures/${fixture}` } });
       expect(r.isError).toBeFalsy();
       expect(r.content[0].text).toMatch(/^Project: .+\nDomain glossary from .*: \d+ terms? in \d+ contexts?\./);
+      expect(r.content[0].text).toMatch(/\n\nAsk about any of these, or carry on with something else\.$/);
       // The model goes to the view via _meta, so hosts show the model the text, not JSON.
       expect(r.structuredContent).toBeUndefined();
       const payload = r._meta['domain-visualizer/payload'];

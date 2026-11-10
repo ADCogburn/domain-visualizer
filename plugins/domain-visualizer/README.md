@@ -20,9 +20,9 @@ In claude.ai or Claude Desktop: **Customize > Plugins > Add > Add marketplace**,
 
 ## Use it
 
-Ask Claude something like "show me this project's domain glossary" or "what does Invoice mean here?". Claude calls the `show_domain` tool.
+Type `/domain-visualizer` to open **Home**: the project's name and its artifacts (the glossary and the ADRs). Pick one, or carry on chatting about something else. You can also just ask something like "show me this project's domain glossary" or "what does Invoice mean here?". Either way Claude calls the `show_domain` tool and opens Home.
 
-- Where Claude can show MCP Apps, you get an interactive panel. Glossary terms have a dotted underline; hover or focus one to see its definition. Avoided words are greyed out and point to the term to use instead. Use **Full screen** for the whole glossary.
+- Where Claude can show MCP Apps, you get an interactive panel. Pick the glossary or an ADR from Home. Glossary terms have a dotted underline; hover or focus one to see its definition. Avoided words are greyed out and point to the term to use instead. Use **Full screen** for the whole glossary.
 - Everywhere else, including Claude Code, you get the same glossary as text.
 
 `show_domain` takes either `path` (a project folder or glossary file to read) or `files` (the raw Markdown, for when the server can't see your files).

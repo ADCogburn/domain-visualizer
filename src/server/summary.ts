@@ -1,10 +1,14 @@
 import { adrNumber, countTerms, type DomainModel } from '../model/types.js';
+import type { ViewId } from '../shared/protocol.js';
+
+/** Last line of the Home text: Home is where the user picks an Artifact or moves on. */
+export const HOME_CLOSING_LINE = 'Ask about any of these, or carry on with something else.';
 
 /**
  * Plain-text rendering of the model. This is all Claude Code (and any host without
  * MCP Apps) sees, so it has to stand on its own.
  */
-export function summarize(model: DomainModel, sourceLabel: string): string {
+export function summarize(model: DomainModel, sourceLabel: string, view: ViewId): string {
   const out: string[] = [`Project: ${model.project}`];
   const n = countTerms(model);
   const ctx = model.contexts.length;
@@ -49,5 +53,6 @@ export function summarize(model: DomainModel, sourceLabel: string): string {
     out.push('', '## Warnings');
     for (const w of model.warnings) out.push(`- ${w}`);
   }
+  if (view === 'home') out.push('', HOME_CLOSING_LINE);
   return out.join('\n');
 }

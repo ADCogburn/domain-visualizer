@@ -35622,7 +35622,8 @@ function inlineSource(files) {
 }
 
 // src/server/summary.ts
-function summarize(model, sourceLabel) {
+var HOME_CLOSING_LINE = "Ask about any of these, or carry on with something else.";
+function summarize(model, sourceLabel, view) {
   const out = [`Project: ${model.project}`];
   const n = countTerms(model);
   const ctx = model.contexts.length;
@@ -35663,6 +35664,7 @@ function summarize(model, sourceLabel) {
     out.push("", "## Warnings");
     for (const w of model.warnings) out.push(`- ${w}`);
   }
+  if (view === "home") out.push("", HOME_CLOSING_LINE);
   return out.join("\n");
 }
 
@@ -35679,7 +35681,7 @@ var showDomainInput = external_exports.object({
   ).optional().describe(
     'Raw Markdown files, for when the server cannot read the project: glossary files and ADRs (e.g. "docs/adr/0001-slug.md", or a context\'s "src/billing/docs/adr/\u2026"). Pass exactly one of `path` or `files`.'
   ),
-  view: external_exports.enum(OPEN_VIEWS).optional().describe('Which view to open: "home" (project name and its artifacts) or "glossary". Defaults to "home".'),
+  view: external_exports.enum(OPEN_VIEWS).optional().describe('Which view to open: "home" (project name and its artifacts) or "glossary". Defaults to "home"; usually leave it out so the user picks from Home.'),
   project: external_exports.string().optional().describe("Project name shown at the top. Defaults to package.json `name`, then the folder name.")
 });
 async function showDomain(args, deps) {
@@ -35702,7 +35704,7 @@ async function showDomain(args, deps) {
   }
   const model = await loadDomain(source, { project: args.project });
   const payload = { view: args.view ?? DEFAULT_VIEW, source: source.label, model };
-  return { content: [{ type: "text", text: summarize(model, source.label) }], _meta: { [PAYLOAD_META_KEY]: payload } };
+  return { content: [{ type: "text", text: summarize(model, source.label, payload.view) }], _meta: { [PAYLOAD_META_KEY]: payload } };
 }
 function error62(text) {
   return { content: [{ type: "text", text }], isError: true };
