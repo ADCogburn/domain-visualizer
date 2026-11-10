@@ -48,8 +48,9 @@ function head(doc: Document, adr: Adr, chat: ChatBoxes): HTMLElement {
   const kicker = el(doc, 'p', { class: 'adr-kicker' }, adr.number === null ? 'ADR' : `ADR ${adrNumber(adr.number)}`);
   if (adr.context) kicker.append(el(doc, 'span', { class: 'adr-ctx' }, ` · ${adr.context}`));
   if (adr.status) kicker.append(statusBadge(doc, adr.status));
-  const title = el(doc, 'div', { class: 'adr-title-row' }, el(doc, 'h1', { class: 'adr-title' }, adr.title), chat.button(adrPrompt(adr), header, adr.title));
-  header.append(kicker, title, el(doc, 'p', { class: 'adr-path' }, adr.path));
+  // "Chat about this" sits at the right end of the kicker line, as on Home, so it stays put however long the title is.
+  const tagline = el(doc, 'div', { class: 'adr-tagline' }, kicker, chat.button(adrPrompt(adr), header, adr.title));
+  header.append(tagline, el(doc, 'h1', { class: 'adr-title' }, adr.title), el(doc, 'p', { class: 'adr-path' }, adr.path));
   return header;
 }
 

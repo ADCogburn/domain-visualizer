@@ -85,6 +85,18 @@ body {
 :root[data-display-mode='fullscreen'] #app {
   padding: 16px;
 }
+/* Home gets more room: the panel is narrow (about a third of the window), so breathe vertically. */
+:root[data-page='home'] #app {
+  padding: 12px 8px 16px;
+}
+:root[data-page='home'][data-display-mode='fullscreen'] #app {
+  padding: clamp(20px, 4vw, 40px) clamp(16px, 5vw, 36px) 40px;
+}
+/* One readable column when full screen is wide. */
+:root[data-page='home'][data-display-mode='fullscreen'] #app > * {
+  max-width: 760px;
+  margin-inline: auto;
+}
 
 .dv-header {
   display: flex;
@@ -92,13 +104,46 @@ body {
   gap: 8px;
   margin-bottom: 10px;
 }
+:root[data-page='home'] .dv-header {
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: var(--border-width-regular) solid var(--color-border-tertiary);
+}
+.dv-heading {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.dv-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+/* A small lit square: the "online" dot of a console. */
+.dv-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--color-text-info);
+  box-shadow: 0 0 6px var(--color-text-info);
+}
 .dv-title {
   margin: 0;
   font-size: var(--font-heading-md-size);
   font-weight: var(--font-weight-semibold);
 }
 :root[data-page='home'] .dv-title {
-  font-size: calc(var(--font-heading-md-size) * 1.25);
+  font-size: calc(var(--font-heading-md-size) * 1.5);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   overflow-wrap: anywhere;
 }
 .dv-spacer {

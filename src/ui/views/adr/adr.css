@@ -13,15 +13,27 @@
 
 .adr-head {
   display: grid;
-  gap: 4px;
-  padding-bottom: 12px;
+  gap: 8px;
+  padding-bottom: 16px;
   border-bottom: var(--border-width-regular) solid var(--color-border-tertiary);
+}
+/* The open chat box comes after the path: give it the same breathing room. */
+.adr-head > .dv-chat-box {
+  margin-top: 8px;
+}
+.adr-tagline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 24px;
 }
 .adr-kicker {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
   margin: 0;
   font-family: var(--font-mono);
   font-size: var(--font-text-xs-size);
@@ -36,13 +48,6 @@
   line-height: 1.25;
   font-weight: var(--font-weight-semibold);
   text-wrap: balance;
-}
-.adr-title-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 4px 12px;
 }
 .adr-path {
   margin: 0;

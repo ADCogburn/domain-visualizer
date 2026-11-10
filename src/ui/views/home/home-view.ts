@@ -37,7 +37,8 @@ function renderHome(root: HTMLElement, model: DomainModel, ctx: ViewContext, exp
   section.append(el(doc, 'h2', { class: 'hm-heading', id: 'hm-artifacts-h' }, 'Artifacts'));
 
   const list = el(doc, 'ul', { class: 'hm-list' });
-  list.append(el(doc, 'li', {}, glossaryRow(doc, model, ctx)));
+  const glossary = glossaryRow(doc, model, ctx);
+  list.append(el(doc, 'li', { class: `hm-card${glossary.tagName === 'BUTTON' ? '' : ' hm-card-empty'}` }, glossary));
   section.append(list);
 
   const adrs = model.adrs ?? [];
@@ -77,21 +78,29 @@ function glossaryRow(doc: Document, model: DomainModel, ctx: ViewContext): HTMLE
   const w = model.warnings.length;
   const meta = [`${c} context${c === 1 ? '' : 's'}`, `${n} term${n === 1 ? '' : 's'}`];
   if (w) meta.push(`${w} warning${w === 1 ? '' : 's'}`);
-  const row = el(doc, 'button', { type: 'button', class: 'hm-row', 'data-artifact': 'glossary' }, rowTitle(doc, 'Glossary'), el(doc, 'p', { class: 'hm-row-meta' }, meta.join(' · ')));
+  const title = rowTitle(doc, 'Glossary');
+  title.append(arrow(doc));
+  const row = el(doc, 'button', { type: 'button', class: 'hm-row', 'data-artifact': 'glossary' }, title, el(doc, 'p', { class: 'hm-row-meta' }, meta.join(' · ')));
   row.addEventListener('click', () => ctx.navigate({ view: 'glossary' }));
   return row;
 }
 
-/** An ADR row that opens its page, with "Chat about this" beside it (a button can't hold another button). */
+/**
+ * An ADR row that opens its page. Number and status sit on a small tag line above the
+ * title; "Chat about this" sits at that line's right end (a button can't hold another
+ * button), so the title and summary keep the card's full width.
+ */
 function adrItem(doc: Document, a: Adr, ctx: ViewContext, chat: ChatBoxes): HTMLElement {
-  const title = el(doc, 'span', { class: 'hm-row-title' });
-  if (a.number !== null) title.append(el(doc, 'span', { class: 'hm-num' }, adrNumber(a.number)));
-  title.append(el(doc, 'span', { class: 'hm-title-text' }, a.title));
-  if (a.status) title.append(statusBadge(doc, a.status));
-  const row = el(doc, 'button', { type: 'button', class: 'hm-row', 'data-adr': a.path, title: a.path }, title);
+  const tags = el(doc, 'span', { class: 'hm-tags' });
+  if (a.number !== null) tags.append(el(doc, 'span', { class: 'hm-num' }, adrNumber(a.number)));
+  if (a.status) tags.append(statusBadge(doc, a.status));
+  const title = el(doc, 'span', { class: 'hm-row-title' }, el(doc, 'span', { class: 'hm-title-text' }, a.title), arrow(doc));
+  const row = el(doc, 'button', { type: 'button', class: 'hm-row', 'data-adr': a.path, title: a.path });
+  if (tags.childNodes.length) row.append(tags);
+  row.append(title);
   if (a.summary) row.append(el(doc, 'p', { class: 'hm-summary' }, a.summary));
   row.addEventListener('click', () => ctx.navigate({ view: 'adr', adr: a.path }, { fullscreen: true }));
-  const item = el(doc, 'li', { class: 'hm-item' }, row);
+  const item = el(doc, 'li', { class: 'hm-card hm-item' }, row);
   item.append(chat.button(adrPrompt(a), item, a.title));
   return item;
 }
@@ -106,4 +115,5 @@ function groupAdrs(adrs: Adr[]): [string | null, Adr[]][] {
   return [...groups].filter(([, items]) => items.length);
 }
 
+const arrow = (doc: Document) => el(doc, 'span', { class: 'hm-arrow', 'aria-hidden': 'true' }, '→');
 const rowTitle = (doc: Document, text: string) => el(doc, 'span', { class: 'hm-row-title' }, el(doc, 'span', { class: 'hm-title-text' }, text));
