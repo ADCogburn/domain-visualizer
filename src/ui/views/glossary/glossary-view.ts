@@ -1,6 +1,7 @@
 import { buildIndex } from '../../../model/term-index.js';
 import { countTerms, type BoundedContext, type DomainModel } from '../../../model/types.js';
 import { contextPrompt, createChatBoxes, termPrompt, type ChatBoxes } from '../shared/chat-box.js';
+import { el } from '../shared/dom.js';
 import { markup, termSpan } from '../shared/highlight.js';
 import { attachTermTooltips, termTarget } from '../shared/term-hover.js';
 import type { DomainView, ViewContext } from '../types.js';
@@ -151,10 +152,3 @@ function jumpTo(root: HTMLElement, context: string, term: string) {
 
 const entryId = (context: string, term: string) => `gl-${slug(context)}--${slug(term)}`;
 const slug = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-');
-
-function el(doc: Document, tag: string, attrs: Record<string, string> = {}, ...children: (Node | string)[]): HTMLElement {
-  const node = doc.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
-  node.append(...children);
-  return node;
-}

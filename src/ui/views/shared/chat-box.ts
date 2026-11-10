@@ -1,7 +1,9 @@
 import { adrNumber, type Adr, type Term } from '../../../model/types.js';
+import { el } from './dom.js';
 import './chat.css';
 
-let previous: AbortController | null = null;
+/** Each document's current Escape listener, so a re-render can drop the old one. */
+const escapeListeners = new WeakMap<Document, AbortController>();
 
 /** Ready-made text for one item, for the user to paste into the chat box. */
 export const termPrompt = (t: Term) => `I want to ask about the Term "${t.name}" (${t.context}).`;
@@ -12,7 +14,8 @@ export interface ChatBoxes {
   /**
    * A "Chat about this" button. Clicking it opens a read-only box with `text` at the end
    * of `container` (in flow, so the inline card grows); clicking it again closes it.
-   * `subject` names the item for screen readers.
+   * `subject` names the item for screen readers. With a mouse, the button shows only while
+   * `container` is hovered or focused, unless `container` has the class `dv-chat-always`.
    */
   button(text: string, container: HTMLElement, subject: string): HTMLButtonElement;
 }
@@ -23,8 +26,9 @@ export interface ChatBoxes {
  */
 export function createChatBoxes(doc: Document): ChatBoxes {
   // One set per document: a re-render replaces the old one's Escape listener.
-  previous?.abort();
-  const controller = (previous = new AbortController());
+  escapeListeners.get(doc)?.abort();
+  const controller = new AbortController();
+  escapeListeners.set(doc, controller);
 
   let seq = 0;
   /** The one open box and the button that opened it. */
@@ -51,24 +55,22 @@ export function createChatBoxes(doc: Document): ChatBoxes {
   return {
     button(text, container, subject) {
       const id = `dv-chat-${++seq}`;
-      const btn = el(doc, 'button', 'dv-chat-btn', 'Chat about this');
-      btn.type = 'button';
-      btn.setAttribute('aria-label', `Chat about this: ${subject}`);
-      btn.setAttribute('aria-expanded', 'false');
-      btn.setAttribute('aria-controls', id);
+      const btn = el(
+        doc,
+        'button',
+        { type: 'button', class: 'dv-chat-btn', 'aria-label': `Chat about this: ${subject}`, 'aria-expanded': 'false', 'aria-controls': id },
+        'Chat about this',
+      );
       container.classList.add('dv-chat-scope');
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const same = open?.btn === btn;
         close();
         if (same) return;
-        const box = el(doc, 'div', 'dv-chat-box');
-        box.id = id;
-        const copy = el(doc, 'button', 'dv-chat-copy', 'Copy');
-        copy.type = 'button';
-        const p = el(doc, 'p', 'dv-chat-text', text);
+        const p = el(doc, 'p', { class: 'dv-chat-text' }, text);
+        const copy = el(doc, 'button', { type: 'button', class: 'dv-chat-copy' }, 'Copy');
         copy.addEventListener('click', () => void copyText(doc, p, copy));
-        box.append(p, copy);
+        const box = el(doc, 'div', { class: 'dv-chat-box', id }, p, copy);
         container.append(box);
         btn.setAttribute('aria-expanded', 'true');
         open = { btn, box };
@@ -125,9 +127,3 @@ function select(doc: Document, node: HTMLElement) {
   sel.addRange(range);
 }
 
-function el<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, cls: string, text?: string): HTMLElementTagNameMap[K] {
-  const n = doc.createElement(tag);
-  n.className = cls;
-  if (text !== undefined) n.textContent = text;
-  return n;
-}

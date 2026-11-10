@@ -44,12 +44,6 @@
   flex-wrap: wrap;
   gap: 4px 12px;
 }
-/* One item on this page, so its button always shows. */
-.adr-head.dv-chat-scope .dv-chat-btn[aria-expanded] {
-  opacity: 1;
-  color: var(--color-text-secondary);
-  border-color: var(--color-border-tertiary);
-}
 .adr-path {
   margin: 0;
   font-family: var(--font-mono);

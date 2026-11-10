@@ -1,4 +1,5 @@
 import type { DomainModel, Term } from '../../../model/types.js';
+import { el } from './dom.js';
 import { createTooltip, type Tooltip } from './tooltip.js';
 import './terms.css';
 
@@ -62,23 +63,17 @@ export const termKey = (context: string, term: string) => `${context}\u0000${ter
 
 function tipContent(doc: Document, span: HTMLElement, term: Term, multi: boolean, opts: TermTooltipOptions): Node[] {
   const out: Node[] = [];
-  const title = el(doc, 'p', 'gl-tip-title');
+  const title = el(doc, 'p', { class: 'gl-tip-title' });
   if (span.dataset.kind === 'avoid') {
-    title.append(el(doc, 'span', 'gl-tip-avoided', `“${span.textContent}”`), ' is avoided. Use ', el(doc, 'strong', '', term.name));
+    title.append(el(doc, 'span', { class: 'gl-tip-avoided' }, `“${span.textContent}”`), ' is avoided. Use ', el(doc, 'strong', {}, term.name));
   } else {
-    title.append(el(doc, 'strong', '', term.name));
+    title.append(el(doc, 'strong', {}, term.name));
   }
-  if (multi) title.append(el(doc, 'span', 'gl-tip-ctx', ` · ${term.context}`));
-  out.push(title, el(doc, 'p', 'gl-tip-def', term.definition || '(no definition)'));
+  if (multi) title.append(el(doc, 'span', { class: 'gl-tip-ctx' }, ` · ${term.context}`));
+  out.push(title, el(doc, 'p', { class: 'gl-tip-def' }, term.definition || '(no definition)'));
   const hint = span.dataset.kind === 'avoid' ? opts.avoidHint?.(term) : null;
-  if (hint) out.push(el(doc, 'p', 'gl-tip-meta', hint));
-  else if (span.dataset.kind !== 'avoid' && term.avoid.length) out.push(el(doc, 'p', 'gl-tip-meta', `Avoid: ${term.avoid.join(', ')}`));
+  if (hint) out.push(el(doc, 'p', { class: 'gl-tip-meta' }, hint));
+  else if (span.dataset.kind !== 'avoid' && term.avoid.length) out.push(el(doc, 'p', { class: 'gl-tip-meta' }, `Avoid: ${term.avoid.join(', ')}`));
   return out;
 }
 
-function el(doc: Document, tag: string, cls: string, text?: string): HTMLElement {
-  const n = doc.createElement(tag);
-  if (cls) n.className = cls;
-  if (text !== undefined) n.textContent = text;
-  return n;
-}

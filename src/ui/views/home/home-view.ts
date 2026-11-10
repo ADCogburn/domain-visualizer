@@ -1,6 +1,7 @@
 import { adrNumber, countTerms, type Adr, type DomainModel } from '../../../model/types.js';
 import { statusBadge } from '../shared/badge.js';
 import { adrPrompt, createChatBoxes, type ChatBoxes } from '../shared/chat-box.js';
+import { el } from '../shared/dom.js';
 import type { DomainView, ViewContext } from '../types.js';
 import './home.css';
 
@@ -87,7 +88,7 @@ function adrItem(doc: Document, a: Adr, ctx: ViewContext, chat: ChatBoxes): HTML
   if (a.number !== null) title.append(el(doc, 'span', { class: 'hm-num' }, adrNumber(a.number)));
   title.append(el(doc, 'span', { class: 'hm-title-text' }, a.title));
   if (a.status) title.append(statusBadge(doc, a.status));
-  const row = el(doc, 'button', { type: 'button', class: 'hm-row hm-row-chat', 'data-adr': a.path, title: a.path }, title);
+  const row = el(doc, 'button', { type: 'button', class: 'hm-row', 'data-adr': a.path, title: a.path }, title);
   if (a.summary) row.append(el(doc, 'p', { class: 'hm-summary' }, a.summary));
   row.addEventListener('click', () => ctx.navigate({ view: 'adr', adr: a.path }, { fullscreen: true }));
   const item = el(doc, 'li', { class: 'hm-item' }, row);
@@ -106,10 +107,3 @@ function groupAdrs(adrs: Adr[]): [string | null, Adr[]][] {
 }
 
 const rowTitle = (doc: Document, text: string) => el(doc, 'span', { class: 'hm-row-title' }, el(doc, 'span', { class: 'hm-title-text' }, text));
-
-function el(doc: Document, tag: string, attrs: Record<string, string> = {}, ...children: (Node | string)[]): HTMLElement {
-  const node = doc.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
-  node.append(...children);
-  return node;
-}

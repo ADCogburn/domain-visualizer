@@ -2,6 +2,7 @@ import { buildIndex } from '../../../model/term-index.js';
 import { adrNumber, type Adr, type DomainModel } from '../../../model/types.js';
 import { statusBadge } from '../shared/badge.js';
 import { adrPrompt, createChatBoxes, type ChatBoxes } from '../shared/chat-box.js';
+import { el } from '../shared/dom.js';
 import { markup } from '../shared/highlight.js';
 import { attachTermTooltips } from '../shared/term-hover.js';
 import type { DomainView, ViewContext } from '../types.js';
@@ -42,7 +43,8 @@ export const adrView: DomainView = {
 };
 
 function head(doc: Document, adr: Adr, chat: ChatBoxes): HTMLElement {
-  const header = el(doc, 'header', { class: 'adr-head' });
+  // One item on this page, so its "Chat about this" always shows.
+  const header = el(doc, 'header', { class: 'adr-head dv-chat-always' });
   const kicker = el(doc, 'p', { class: 'adr-kicker' }, adr.number === null ? 'ADR' : `ADR ${adrNumber(adr.number)}`);
   if (adr.context) kicker.append(el(doc, 'span', { class: 'adr-ctx' }, ` · ${adr.context}`));
   if (adr.status) kicker.append(statusBadge(doc, adr.status));
@@ -91,11 +93,4 @@ function resolve(fromFile: string, target: string): string | null {
     } else parts.push(seg);
   }
   return parts.join('/');
-}
-
-function el(doc: Document, tag: string, attrs: Record<string, string> = {}, ...children: (Node | string)[]): HTMLElement {
-  const node = doc.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
-  node.append(...children);
-  return node;
 }
