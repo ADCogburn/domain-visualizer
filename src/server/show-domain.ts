@@ -27,7 +27,7 @@ export const showDomainInput = z.object({
     .describe(
       'Raw Markdown files, for when the server cannot read the project: glossary files and ADRs (e.g. "docs/adr/0001-slug.md", or a context\'s "src/billing/docs/adr/…"). Pass exactly one of `path` or `files`.',
     ),
-  view: z.enum(OPEN_VIEWS).optional().describe('Which view to open: "home" (project name and its artifacts) or "glossary". Defaults to "home".'),
+  view: z.enum(OPEN_VIEWS).optional().describe('Which view to open: "home" (project name and its artifacts) or "glossary". Defaults to "home"; usually leave it out so the user picks from Home.'),
   project: z.string().optional().describe('Project name shown at the top. Defaults to package.json `name`, then the folder name.'),
 });
 
@@ -71,7 +71,7 @@ export async function showDomain(args: ShowDomainArgs, deps: ShowDomainDeps): Pr
 
   const model = await loadDomain(source, { project: args.project });
   const payload: ShowDomainPayload = { view: args.view ?? DEFAULT_VIEW, source: source.label, model };
-  return { content: [{ type: 'text', text: summarize(model, source.label) }], _meta: { [PAYLOAD_META_KEY]: payload } };
+  return { content: [{ type: 'text', text: summarize(model, source.label, payload.view) }], _meta: { [PAYLOAD_META_KEY]: payload } };
 }
 
 function error(text: string): ShowDomainResult {

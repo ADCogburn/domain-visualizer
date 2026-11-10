@@ -21,7 +21,15 @@ describe('showDomain', () => {
 
   it('reads raw files', async () => {
     const r = await showDomain({ files: [{ path: 'GLOSSARY.md', content: '# Shop\n\n## Language\n\n**Cart**:\nItems a shopper intends to buy.\n' }] }, deps);
-    expect(r.content[0]!.text).toBe('Project: Domain\nDomain glossary from inline files: 1 term in 1 context.\n\n## Shop (GLOSSARY.md)\n- **Cart**: Items a shopper intends to buy.');
+    expect(r.content[0]!.text).toBe('Project: Domain\nDomain glossary from inline files: 1 term in 1 context.\n\n## Shop (GLOSSARY.md)\n- **Cart**: Items a shopper intends to buy.\n\nAsk about any of these, or carry on with something else.');
+  });
+
+  it('ends the Home text with a line inviting the user to pick an Artifact or move on', async () => {
+    const files = [{ path: 'GLOSSARY.md', content: '# Shop\n\n## Language\n\n**Cart**:\nItems a shopper intends to buy.\n' }];
+    const home = (await showDomain({ files }, deps)).content[0]!.text;
+    expect(home.endsWith('\n\nAsk about any of these, or carry on with something else.')).toBe(true);
+    const glossary = (await showDomain({ files, view: 'glossary' }, deps)).content[0]!.text;
+    expect(glossary).not.toContain('carry on with something else');
   });
 
   it('lists clusters and warnings in the text summary', async () => {
@@ -50,7 +58,7 @@ describe('showDomain', () => {
     expect(m.adrs).toEqual([
       { path: 'docs/adr/0003-use-postgres.md', number: 3, title: 'Use Postgres', status: null, context: null, summary: 'We need SQL.', body: 'We need SQL.' },
     ]);
-    expect(r.content[0]!.text).toBe('Project: Shop\nNo glossary found in inline files.\n\n## ADRs (1)\n- 0003 Use Postgres (docs/adr/0003-use-postgres.md)');
+    expect(r.content[0]!.text).toBe('Project: Shop\nNo glossary found in inline files.\n\n## ADRs (1)\n- 0003 Use Postgres (docs/adr/0003-use-postgres.md)\n\nAsk about any of these, or carry on with something else.');
   });
 
   it('requires exactly one of path or files', async () => {
